@@ -216,7 +216,7 @@ for (const filename of readdirSync(directory).filter((name) => /\.ya?ml$/u.test(
         named['Transfer inert release inputs']?.with?.name !== 'release-input' ||
         named['Transfer inert release inputs']?.with?.['retention-days'] !== 1 ||
         named['Download inert release inputs']?.uses !==
-          'actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0' ||
+          'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c' ||
         named['Download inert release inputs']?.with?.name !== 'release-input' ||
         named['Attest verified release assets']?.uses !==
           'actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6' ||

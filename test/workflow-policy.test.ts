@@ -98,7 +98,7 @@ describe('workflow policy mutation resistance', () => {
     const downloader = createFixture();
     mutateRelease(
       downloader,
-      'actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0',
+      'actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c',
       'actions/download-artifact@0000000000000000000000000000000000000000'
     );
     expect(validate(downloader).status).not.toBe(0);
