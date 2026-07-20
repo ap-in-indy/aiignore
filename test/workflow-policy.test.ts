@@ -13,6 +13,26 @@ describe('workflow policy mutation resistance', () => {
     expect(validate(fixture).status).toBe(0);
   });
 
+  it('preserves well-known metadata in the canonical Pages artifact', () => {
+    const hiddenFilesExcluded = createFixture();
+    mutateFile(
+      hiddenFilesExcluded,
+      '.github/workflows/pages.yml',
+      '--exclude=.github',
+      '--exclude=.github \\\n+            --exclude=".[^/]*"'
+    );
+    expect(validate(hiddenFilesExcluded).status).not.toBe(0);
+
+    const unreviewedUploader = createFixture();
+    mutateFile(
+      unreviewedUploader,
+      '.github/workflows/pages.yml',
+      'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02',
+      'actions/upload-artifact@0000000000000000000000000000000000000000'
+    );
+    expect(validate(unreviewedUploader).status).not.toBe(0);
+  });
+
   it('rejects commented-out gates and continue-on-error bypasses', () => {
     const commented = createFixture();
     mutateRelease(commented, 'run: npm run security:secrets', "run: '# npm run security:secrets'");

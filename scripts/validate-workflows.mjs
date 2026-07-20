@@ -343,6 +343,26 @@ for (const filename of readdirSync(directory).filter((name) => /\.ya?ml$/u.test(
   ) {
     failures.push('pages.yml: canonical publication must validate the artifact manifest');
   }
+  if (filename === 'pages.yml') {
+    const steps = workflow.jobs?.deploy?.steps ?? [];
+    const archive = steps.find(
+      (step) => step?.name === 'Archive canonical site including well-known metadata'
+    );
+    const upload = steps.find(
+      (step) =>
+        step?.uses === 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02'
+    );
+    const archiveRun = executableLines(archive).join('\n');
+    if (
+      !archiveRun.includes('--directory site-dist') ||
+      archiveRun.includes('--exclude=".[^/]*"') ||
+      upload?.with?.name !== 'github-pages' ||
+      upload?.with?.path !== '${{ runner.temp }}/artifact.tar' ||
+      upload?.with?.['if-no-files-found'] !== 'error'
+    ) {
+      failures.push('pages.yml: canonical archive must preserve well-known metadata');
+    }
+  }
   if (filename === 'secret-scan.yml') {
     const steps = workflow.jobs?.gitleaks?.steps ?? [];
     const checkout = steps.find((step) => typeof step?.uses === 'string' && step.uses.startsWith('actions/checkout@'));
