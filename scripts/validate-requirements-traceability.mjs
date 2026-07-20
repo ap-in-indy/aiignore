@@ -115,7 +115,9 @@ function readJson(filename, label) {
   try {
     return JSON.parse(decodeUtf8(bytes, label));
   } catch (error) {
-    if (error instanceof SyntaxError) throw new Error(`${label} is not valid JSON`);
+    if (error instanceof SyntaxError) {
+      throw new Error(`${label} is not valid JSON`, { cause: error });
+    }
     throw error;
   }
 }
