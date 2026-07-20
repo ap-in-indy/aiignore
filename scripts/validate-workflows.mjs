@@ -212,7 +212,7 @@ for (const filename of readdirSync(directory).filter((name) => /\.ya?ml$/u.test(
       }
       if (
         named['Transfer inert release inputs']?.uses !==
-          'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' ||
+          'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' ||
         named['Transfer inert release inputs']?.with?.name !== 'release-input' ||
         named['Transfer inert release inputs']?.with?.['retention-days'] !== 1 ||
         named['Download inert release inputs']?.uses !==
@@ -350,7 +350,7 @@ for (const filename of readdirSync(directory).filter((name) => /\.ya?ml$/u.test(
     );
     const upload = steps.find(
       (step) =>
-        step?.uses === 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02'
+        step?.uses === 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
     );
     const archiveRun = executableLines(archive).join('\n');
     if (
