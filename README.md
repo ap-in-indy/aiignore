@@ -39,7 +39,17 @@ resources a platform can enforce completely.
 
 ## Quick start
 
-Before the first package release, evaluate the draft from source:
+Install the exact prerelease intentionally rather than accepting future alpha
+changes implicitly:
+
+```sh
+npm install --ignore-scripts --save-dev aiignore@0.1.0-alpha.1
+npx aiignore init
+npx aiignore validate
+npx aiignore doctor
+```
+
+To evaluate the draft directly from source instead:
 
 ```sh
 git clone https://github.com/ap-in-indy/aiignore.git
@@ -49,16 +59,6 @@ npm run build
 cp profiles/recommended.aiignore.yaml .aiignore.yaml
 node dist/cli.js validate
 node dist/cli.js doctor
-```
-
-After an alpha is published, install the exact prerelease intentionally rather
-than accepting future alpha changes implicitly:
-
-```sh
-npm install --ignore-scripts --save-dev aiignore@0.1.0-alpha.1
-npx aiignore init
-npx aiignore validate
-npx aiignore doctor
 ```
 
 `aiignore init` validates the packaged recommended profile before creating the

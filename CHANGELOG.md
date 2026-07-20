@@ -6,7 +6,7 @@ specification compatibility is identified separately by the `aiignore` field.
 
 ## [Unreleased]
 
-## [0.1.0-alpha.1] - 2026-07-16
+## [0.1.0-alpha.1] - 2026-07-20
 
 ### Added
 
