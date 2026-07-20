@@ -1,0 +1,5 @@
+{
+  "name": "aiignore-gemini",
+  "version": "0.1.0",
+  "description": "Supplemental Gemini CLI enforcement for the experimental aiignore policy specification"
+}

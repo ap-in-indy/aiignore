@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "aiignore-before-tool",
+            "type": "command",
+            "command": "node \"${extensionPath}${/}scripts${/}before_tool.mjs\"",
+            "timeout": 15000,
+            "description": "Check direct Gemini CLI tool input against .aiignore.yaml policy"
+          }
+        ]
+      }
+    ]
+  }
+}

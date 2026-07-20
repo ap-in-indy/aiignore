@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$PLUGIN_ROOT/scripts/pre_tool_use.mjs\"",
+            "commandWindows": "node \"%PLUGIN_ROOT%\\scripts\\pre_tool_use.mjs\"",
+            "timeout": 15,
+            "statusMessage": "Checking aiignore policy"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,293 @@
+name: Build release candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing signed tag to release (for example v0.1.0-alpha.1)
+        required: true
+        type: string
+      publish_npm:
+        description: Publish to npm and promote the matching GitHub prerelease
+        required: true
+        default: false
+        type: boolean
+
+permissions: {}
+
+concurrency:
+  group: npm-publication
+  cancel-in-progress: false
+
+jobs:
+  build:
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      published: ${{ steps.preflight.outputs.published }}
+      tarball: ${{ steps.package.outputs.tarball }}
+      sbom: ${{ steps.package.outputs.sbom }}
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ inputs.tag }}
+      - name: Verify signed tag and version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          TAG_PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)-alpha\.([1-9][0-9]*)$'
+          [[ "$RELEASE_TAG" =~ $TAG_PATTERN ]]
+          test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
+          test "$(gh api "repos/$GITHUB_REPOSITORY" --jq '.visibility')" = "public"
+          TAG_REF=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG")
+          test "$(jq -r '.object.type' <<<"$TAG_REF")" = "tag"
+          TAG_OBJECT_SHA=$(jq -r '.object.sha' <<<"$TAG_REF")
+          TAG_OBJECT=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$TAG_OBJECT_SHA")
+          test "$(jq -r '.verification.verified' <<<"$TAG_OBJECT")" = "true"
+          test "$(jq -r '.verification.reason' <<<"$TAG_OBJECT")" = "valid"
+          test "$(jq -r '.tagger.name' <<<"$TAG_OBJECT")" = "Alex"
+          test "$(jq -r '.tagger.email' <<<"$TAG_OBJECT")" = "alex@alexdoes.it"
+          test "$(jq -r '.message' <<<"$TAG_OBJECT")" = "aiignore policy ${RELEASE_TAG#v}"
+          test "$(jq -r '.object.sha' <<<"$TAG_OBJECT")" = "$(git rev-parse HEAD)"
+          git fetch origin main --no-tags
+          git merge-base --is-ancestor HEAD origin/main
+          test "v$(node -p "require('./package.json').version")" = "$RELEASE_TAG"
+          test -f "docs/release-notes/${RELEASE_TAG#v}.md"
+      - name: Verify restricted release environment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ENVIRONMENT=$(gh api "repos/$GITHUB_REPOSITORY/environments/release")
+          test "$(jq -r '.name' <<<"$ENVIRONMENT")" = "release"
+          test "$(jq -r '.can_admins_bypass' <<<"$ENVIRONMENT")" = "false"
+          jq -e \
+            '[.protection_rules[] | select(.type == "required_reviewers")] | length == 0' \
+            <<<"$ENVIRONMENT" >/dev/null
+          test "$(jq -r '.deployment_branch_policy.protected_branches' <<<"$ENVIRONMENT")" = "false"
+          test "$(jq -r '.deployment_branch_policy.custom_branch_policies' <<<"$ENVIRONMENT")" = "true"
+          DEPLOYMENT_POLICIES=$(gh api \
+            "repos/$GITHUB_REPOSITORY/environments/release/deployment-branch-policies")
+          jq -e '.total_count == 1 and .branch_policies[0].name == "v*" and .branch_policies[0].type == "tag"' \
+            <<<"$DEPLOYMENT_POLICIES" >/dev/null
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+      - run: npm install --global npm@11.5.1
+      - run: npm ci --ignore-scripts
+      - run: npm audit --omit=dev --audit-level=low
+      - run: npm audit signatures
+      - name: Run complete verification gate
+        run: npm run verify
+      - name: Rescan full Git history
+        run: npm run security:secrets
+      - name: Inspect existing release state
+        id: preflight
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            RELEASE_STATE=$(gh release view "$RELEASE_TAG" --json isDraft,isPrerelease)
+            test "$(jq -r '.isPrerelease' <<<"$RELEASE_STATE")" = "true"
+            if test "$(jq -r '.isDraft' <<<"$RELEASE_STATE")" = "false"; then
+              echo "published=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "published=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Verify canonical public artifacts byte for byte
+        if: ${{ steps.preflight.outputs.published != 'true' }}
+        run: npm run publication:verify
+      - name: Build package and checksums
+        id: package
+        run: |
+          INPUT_DIRECTORY="$RUNNER_TEMP/release-input"
+          mkdir "$INPUT_DIRECTORY"
+          TARBALL=$(npm pack --json --pack-destination "$INPUT_DIRECTORY" | jq -r '.[0].filename')
+          SBOM="${TARBALL%.tgz}.sbom.cdx.json"
+          RAW_SBOM=$(mktemp)
+          npm sbom --omit=dev --sbom-format=cyclonedx > "$RAW_SBOM"
+          node scripts/normalize-sbom.mjs "$RAW_SBOM" "$INPUT_DIRECTORY/$SBOM"
+          NPM_CLI_TARBALL=$(npm pack npm@11.5.1 --silent --pack-destination "$INPUT_DIRECTORY")
+          test "$NPM_CLI_TARBALL" = "npm-11.5.1.tgz"
+          NPM_CLI_INTEGRITY=$(node -e \
+            'const c=require("node:crypto"),f=require("node:fs");process.stdout.write(`sha512-${c.createHash("sha512").update(f.readFileSync(process.argv[1])).digest("base64")}`)' \
+            "$INPUT_DIRECTORY/$NPM_CLI_TARBALL")
+          test "$NPM_CLI_INTEGRITY" = "sha512-Iy5vXZ55m8tIaSCz6bqQf9+W5XbPfoyURsgWLjOkFglqHTep6RDZqRj2sfYGeRyZvGu2HuJWm0lux0rxPQ29lQ=="
+          (cd "$INPUT_DIRECTORY" && sha256sum "$TARBALL" "$SBOM" > SHA256SUMS)
+          echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
+          echo "sbom=$SBOM" >> "$GITHUB_OUTPUT"
+      - name: Transfer inert release inputs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-input
+          path: ${{ runner.temp }}/release-input
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  release:
+    needs: build
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ inputs.tag }}
+      - name: Download inert release inputs
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: release-input
+          path: release-input
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+      - name: Verify transferred release inputs
+        env:
+          TARBALL: ${{ needs.build.outputs.tarball }}
+          SBOM: ${{ needs.build.outputs.sbom }}
+        run: |
+          EXPECTED_FILES=$(printf '%s\n' "$TARBALL" "$SBOM" SHA256SUMS npm-11.5.1.tgz | sort)
+          ACTUAL_FILES=$(find release-input -mindepth 1 -maxdepth 1 -type f -printf '%f\n' | sort)
+          test "$ACTUAL_FILES" = "$EXPECTED_FILES"
+          (cd release-input && sha256sum --check --strict SHA256SUMS)
+          NPM_CLI_INTEGRITY=$(node -e \
+            'const c=require("node:crypto"),f=require("node:fs");process.stdout.write(`sha512-${c.createHash("sha512").update(f.readFileSync(process.argv[1])).digest("base64")}`)' \
+            release-input/npm-11.5.1.tgz)
+          test "$NPM_CLI_INTEGRITY" = "sha512-Iy5vXZ55m8tIaSCz6bqQf9+W5XbPfoyURsgWLjOkFglqHTep6RDZqRj2sfYGeRyZvGu2HuJWm0lux0rxPQ29lQ=="
+          mkdir "$RUNNER_TEMP/npm-cli"
+          tar -xzf release-input/npm-11.5.1.tgz -C "$RUNNER_TEMP/npm-cli"
+          test -f "$RUNNER_TEMP/npm-cli/package/bin/npm-cli.js"
+          echo "NPM_CLI=$RUNNER_TEMP/npm-cli/package/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Create draft or verify the previously inspected prerelease
+        id: release_state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          PUBLISH_NPM: ${{ inputs.publish_npm }}
+          TARBALL: release-input/${{ needs.build.outputs.tarball }}
+          SBOM: release-input/${{ needs.build.outputs.sbom }}
+          CHECKSUMS: release-input/SHA256SUMS
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            RELEASE_STATE=$(gh release view "$RELEASE_TAG" --json isDraft,isPrerelease)
+            IS_DRAFT=$(jq -r '.isDraft' <<<"$RELEASE_STATE")
+            test "$(jq -r '.isPrerelease' <<<"$RELEASE_STATE")" = "true"
+            if test "$PUBLISH_NPM" = "false"; then
+              test "$IS_DRAFT" = "true"
+              gh release upload "$RELEASE_TAG" "$TARBALL" "$SBOM" "$CHECKSUMS" --clobber
+              gh release edit "$RELEASE_TAG" --prerelease --title "aiignore policy $RELEASE_TAG" \
+                --notes-file "docs/release-notes/${RELEASE_TAG#v}.md"
+            else
+              RELEASE_METADATA=$(gh release view "$RELEASE_TAG" --json name,body)
+              test "$(jq -r '.name' <<<"$RELEASE_METADATA")" = "aiignore policy $RELEASE_TAG"
+              test "$(jq -r '.body' <<<"$RELEASE_METADATA")" = \
+                "$(cat "docs/release-notes/${RELEASE_TAG#v}.md")"
+              EXPECTED_ASSETS=$(printf '%s\n' "$(basename "$TARBALL")" "$(basename "$SBOM")" SHA256SUMS | sort)
+              ACTUAL_ASSETS=$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name' | sort)
+              test "$ACTUAL_ASSETS" = "$EXPECTED_ASSETS"
+              RELEASE_DIRECTORY=$(mktemp -d)
+              gh release download "$RELEASE_TAG" --dir "$RELEASE_DIRECTORY"
+              cmp --silent "$CHECKSUMS" "$RELEASE_DIRECTORY/SHA256SUMS"
+              (cd "$RELEASE_DIRECTORY" && sha256sum --check --strict SHA256SUMS)
+              if test "$IS_DRAFT" = "false"; then
+                PACKAGE=$(node -p "require('./package.json').name")
+                VERSION=$(node -p "require('./package.json').version")
+                EXPECTED_INTEGRITY=$(node -e \
+                  'const c=require("node:crypto"),f=require("node:fs");process.stdout.write(`sha512-${c.createHash("sha512").update(f.readFileSync(process.argv[1])).digest("base64")}`)' \
+                  "$TARBALL")
+                PUBLISHED_INTEGRITY=$(node "$NPM_CLI" view "$PACKAGE@$VERSION" dist.integrity 2>/dev/null || true)
+                test -n "$PUBLISHED_INTEGRITY"
+                test "$PUBLISHED_INTEGRITY" = "$EXPECTED_INTEGRITY"
+              fi
+            fi
+            echo "published=$([[ "$IS_DRAFT" = "false" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          else
+            test "$PUBLISH_NPM" = "false"
+            gh release create "$RELEASE_TAG" "$TARBALL" "$SBOM" "$CHECKSUMS" \
+              --draft --prerelease --verify-tag --title "aiignore policy $RELEASE_TAG" \
+              --notes-file "docs/release-notes/${RELEASE_TAG#v}.md"
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Attest verified release assets
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
+        with:
+          subject-path: |
+            release-input/${{ needs.build.outputs.tarball }}
+            release-input/${{ needs.build.outputs.sbom }}
+            release-input/SHA256SUMS
+      - name: Publish package using npm trusted publishing
+        if: ${{ inputs.publish_npm }}
+        env:
+          TARBALL: release-input/${{ needs.build.outputs.tarball }}
+          PUBLISHED_RELEASE: ${{ steps.release_state.outputs.published }}
+        run: |
+          PACKAGE=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          EXPECTED_INTEGRITY=$(node -e \
+            'const c=require("node:crypto"),f=require("node:fs");process.stdout.write(`sha512-${c.createHash("sha512").update(f.readFileSync(process.argv[1])).digest("base64")}`)' \
+            "$TARBALL")
+          PUBLISHED_INTEGRITY=$(node "$NPM_CLI" view "$PACKAGE@$VERSION" dist.integrity 2>/dev/null || true)
+          if test -n "$PUBLISHED_INTEGRITY"; then
+            test "$PUBLISHED_INTEGRITY" = "$EXPECTED_INTEGRITY"
+            echo "$PACKAGE@$VERSION is already published with the identical tarball"
+          else
+            CURRENT_ALPHA=$(node "$NPM_CLI" view "$PACKAGE" dist-tags.alpha 2>/dev/null || true)
+            if test -n "$CURRENT_ALPHA"; then
+              node scripts/validate-alpha-advance.mjs "$CURRENT_ALPHA" "$VERSION"
+            fi
+            node "$NPM_CLI" publish "$TARBALL" --access public --tag alpha
+          fi
+          if test "$PUBLISHED_RELEASE" != "true"; then
+            test "$(node "$NPM_CLI" view "$PACKAGE" dist-tags.alpha)" = "$VERSION"
+          fi
+          LATEST_VERSION=$(node "$NPM_CLI" view "$PACKAGE" dist-tags.latest 2>/dev/null || true)
+          test "$LATEST_VERSION" != "$VERSION"
+          if test -n "$LATEST_VERSION"; then
+            STABLE_PATTERN='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+            [[ "$LATEST_VERSION" =~ $STABLE_PATTERN ]]
+          fi
+      - name: Publish the matching GitHub prerelease
+        if: ${{ inputs.publish_npm }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          TARBALL: release-input/${{ needs.build.outputs.tarball }}
+          SBOM: release-input/${{ needs.build.outputs.sbom }}
+          CHECKSUMS: release-input/SHA256SUMS
+        run: |
+          RELEASE_METADATA=$(gh release view "$RELEASE_TAG" --json name,body)
+          test "$(jq -r '.name' <<<"$RELEASE_METADATA")" = "aiignore policy $RELEASE_TAG"
+          test "$(jq -r '.body' <<<"$RELEASE_METADATA")" = \
+            "$(cat "docs/release-notes/${RELEASE_TAG#v}.md")"
+          EXPECTED_ASSETS=$(printf '%s\n' "$(basename "$TARBALL")" "$(basename "$SBOM")" SHA256SUMS | sort)
+          ACTUAL_ASSETS=$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name' | sort)
+          test "$ACTUAL_ASSETS" = "$EXPECTED_ASSETS"
+          RELEASE_DIRECTORY=$(mktemp -d)
+          gh release download "$RELEASE_TAG" --dir "$RELEASE_DIRECTORY"
+          cmp --silent "$CHECKSUMS" "$RELEASE_DIRECTORY/SHA256SUMS"
+          (cd "$RELEASE_DIRECTORY" && sha256sum --check --strict SHA256SUMS)
+          if test "$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft')" = "true"; then
+            gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false
+          fi
+          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft')" = "false"
+          test "$(gh release view "$RELEASE_TAG" --json isPrerelease --jq '.isPrerelease')" = "true"

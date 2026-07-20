@@ -1,0 +1,64 @@
+{
+  "reportVersion": "0.1.0-alpha.1",
+  "status": "withdrawn",
+  "date": "2026-07-15",
+  "specification": "0.1",
+  "vectorsRevision": "0.1.0-alpha.1",
+  "vectorsUri": "https://raw.githubusercontent.com/ap-in-indy/aiignore/bde9f6722298b7c749db26b5c79c6eea876c751f/test/conformance/v0.1.json",
+  "vectorsSha256": "6eadde566537174e05116b76dc22d43ecf50bc6e7e9a93a093478e7e8d8ce960",
+  "referenceImplementation": "aiignore-policy@0.1.0-alpha.1",
+  "sourceCommit": "bde9f6722298b7c749db26b5c79c6eea876c751f",
+  "sourceTreeDirty": false,
+  "runnerSha256": "c725c363e680e70c164766c13895d46d7b8c1ea6dbc501ed8dd47bd6cbef5ad9",
+  "policySha256": "8fff50bd4c75a2bf5f4bf860127b05e0de473c8b24daed3dd4ed27e9dfa1aecf",
+  "harness": {
+    "name": "OpenAI Codex CLI",
+    "version": "0.144.2"
+  },
+  "platform": {
+    "os": "darwin",
+    "version": "26.5.2",
+    "architecture": "x64",
+    "backend": "Seatbelt",
+    "build": "25F84",
+    "kernel": "Darwin 25.5.0"
+  },
+  "invocation": "node testbed/codex/run-live.mjs",
+  "modelInvoked": false,
+  "results": [
+    { "id": "allowed-public-read", "resource": "file", "operation": "read", "level": "sandbox", "passed": true },
+    { "id": "direct-private-read", "resource": "file", "operation": "read", "level": "sandbox", "passed": true },
+    { "id": "shell-private-read", "resource": "file", "operation": "read", "level": "sandbox", "passed": true },
+    { "id": "symlink-private-read", "resource": "file", "operation": "read", "level": "sandbox", "passed": true },
+    { "id": "private-write", "resource": "file", "operation": "write", "level": "sandbox", "passed": true },
+    { "id": "private-execute", "resource": "file", "operation": "execute", "level": "sandbox", "passed": true },
+    { "id": "private-discovery", "resource": "file", "operation": "discover", "level": "sandbox", "passed": true },
+    { "id": "git-history-private-read", "resource": "file", "operation": "read-history", "level": "sandbox", "passed": true },
+    {
+      "id": "archive-private-read",
+      "resource": "file",
+      "operation": "read-archive",
+      "level": "sandbox",
+      "passed": false,
+      "details": "A pre-existing allowed archive containing copied protected bytes remained readable; the report did not retain the canary."
+    },
+    { "id": "environment-inheritance", "resource": "environment", "operation": "inherit", "level": "tool", "passed": true },
+    { "id": "loopback-network", "resource": "network", "operation": "connect", "level": "sandbox", "passed": true }
+  ],
+  "notTested": [
+    "Codex built-in indexing/context exclusion",
+    "remote domain allow and deny rules",
+    "redirect and DNS rebinding behavior",
+    "environment filtering through a full model-driven Codex session",
+    "string mediation inside Codex",
+    "MCP, app, browser, and web-search tools",
+    "Linux bubblewrap, WSL2, and native Windows backends"
+  ],
+  "limitations": [
+    "The tested policy used an exact denied subtree compiled from private/**.",
+    "Environment filtering was supplied by the aiignore run launcher because Codex permission profiles do not filter inherited variables.",
+    "A pre-existing allowed archive containing copied protected bytes remained readable; path denial does not provide content provenance.",
+    "This unsigned local report is evidence, not a certification or portable guarantee."
+  ],
+  "withdrawalReason": "The report hashed the baseline decision-vector pack even though the live sandbox scenarios were embedded separately in the runner. The observations are retained for audit history, but the provenance metadata does not identify the exact executed test plan."
+}

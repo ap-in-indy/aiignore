@@ -1,0 +1,83 @@
+aiignore: "0.1"
+
+metadata:
+  name: complete-example
+  description: Demonstrates every draft 0.1 resource.
+
+defaults:
+  files: allow
+  environment: allow
+  network: deny
+  strings: allow
+
+rules:
+  files:
+    - id: private-files
+      effect: deny
+      priority: 10
+      operations: [discover, index, read, write, execute]
+      paths:
+        - "**/.env*"
+        - "secrets/**"
+        - "**/*.pem"
+        - "**/*.key"
+      except:
+        - "**/.env.example"
+        - "test/fixtures/**"
+
+    - id: generated-read-only
+      effect: read-only
+      paths: ["generated/**"]
+
+  environment:
+    - id: credential-variables
+      effect: drop
+      names:
+        - "*_TOKEN"
+        - "*_SECRET"
+        - "*_PASSWORD"
+        - "AWS_*"
+        - "GITHUB_TOKEN"
+      except:
+        - "PUBLIC_*"
+        - "*_TOKEN_TTL"
+
+    - id: redact-private-endpoints
+      effect: redact
+      names: ["INTERNAL_*_URL"]
+      replacement: "[REDACTED:internal-url]"
+
+  network:
+    - id: package-registries
+      effect: allow
+      urls:
+        - "https://registry.npmjs.org/**"
+        - "https://github.com/**"
+
+    - id: project-docs
+      effect: allow
+      urls: ["https://docs.example.com/**"]
+
+    - id: docs-upload-deny
+      effect: deny
+      priority: 20
+      urls: ["https://docs.example.com/upload/**"]
+
+  strings:
+    - id: private-key-material
+      effect: redact
+      scopes: [model_input, tool_output, network_request, log]
+      patterns:
+        - type: regex
+          value: "-----BEGIN [A-Z ]*PRIVATE KEY-----"
+      replacement: "[REDACTED:private-key-material]"
+
+    - id: example-secret-marker
+      effect: deny
+      scopes: [network_request, log]
+      patterns:
+        - type: literal
+          value: "AIIGNORE_TEST_SECRET_DO_NOT_USE"
+      except:
+        - type: literal
+          value: "AIIGNORE_TEST_SECRET_DO_NOT_USE_AS_DOCUMENTATION"

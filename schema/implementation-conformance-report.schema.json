@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ap-in-indy.github.io/aiignore/schema/0.1/implementation-conformance-report.schema.json",
+  "title": "aiignore implementation conformance report draft 0.1",
+  "description": "Content-addressed parser and decision-engine interoperability evidence; not a harness-enforcement claim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reportVersion",
+    "reportType",
+    "status",
+    "date",
+    "specification",
+    "conformanceBundle",
+    "implementation",
+    "runner",
+    "suites",
+    "summary",
+    "limitations"
+  ],
+  "properties": {
+    "reportVersion": { "const": "0.1" },
+    "reportType": { "const": "implementation" },
+    "status": { "enum": ["provisional", "verified", "withdrawn"] },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$"
+    },
+    "specification": { "const": "0.1" },
+    "conformanceBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["formatVersion", "release", "uri", "sha256"],
+      "properties": {
+        "formatVersion": { "const": "0.1" },
+        "release": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[a-z0-9.-]+)?$"
+        },
+        "uri": { "$ref": "#/$defs/httpsUri" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "language",
+        "classification",
+        "sourceUri",
+        "sourceRevision",
+        "sourceSha256",
+        "sourceTreeDirty"
+      ],
+      "properties": {
+        "name": { "$ref": "#/$defs/boundedText" },
+        "version": { "$ref": "#/$defs/boundedText" },
+        "language": { "$ref": "#/$defs/boundedText" },
+        "classification": { "enum": ["reference", "derived", "independent"] },
+        "sourceUri": { "$ref": "#/$defs/httpsUri" },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[^\\s\\x00-\\x1f\\x7f]+$"
+        },
+        "sourceSha256": { "$ref": "#/$defs/sha256" },
+        "sourceTreeDirty": { "type": "boolean" }
+      }
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "sha256"],
+      "properties": {
+        "name": { "$ref": "#/$defs/boundedText" },
+        "version": { "$ref": "#/$defs/boundedText" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "suites": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/suite" },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": { "kind": { "const": "parser" } },
+            "required": ["kind"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": { "kind": { "const": "decision" } },
+            "required": ["kind"]
+          },
+          "minContains": 1
+        }
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "passed", "failed", "conformant"],
+      "properties": {
+        "total": { "$ref": "#/$defs/count" },
+        "passed": { "$ref": "#/$defs/count" },
+        "failed": { "$ref": "#/$defs/count" },
+        "conformant": { "type": "boolean" }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 4096 },
+      "contains": {
+        "const": "This report covers restricted-YAML parsing and portable decision semantics only; it does not establish harness, tool, or sandbox enforcement."
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "verification": { "$ref": "#/$defs/verification" },
+    "withdrawalReason": { "type": "string", "minLength": 1, "maxLength": 4096 }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "verified" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["verification", "evidence"],
+        "properties": {
+          "verification": true,
+          "evidence": true,
+          "implementation": {
+            "type": "object",
+            "properties": { "sourceTreeDirty": { "const": false } },
+            "required": ["sourceTreeDirty"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "withdrawn" } },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["withdrawalReason"],
+        "properties": { "withdrawalReason": true }
+      },
+      "else": { "not": { "required": ["withdrawalReason"] } }
+    }
+  ],
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "httpsUri": { "type": "string", "pattern": "^https://[^\\s]+$", "maxLength": 2048 },
+    "boundedText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+    },
+    "count": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+    "caseId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$" },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "revision",
+        "vectorsUri",
+        "vectorsSha256",
+        "total",
+        "passed",
+        "failedCaseIds",
+        "conformant"
+      ],
+      "properties": {
+        "kind": { "enum": ["parser", "decision"] },
+        "revision": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "vectorsUri": { "$ref": "#/$defs/httpsUri" },
+        "vectorsSha256": { "$ref": "#/$defs/sha256" },
+        "policySha256": { "$ref": "#/$defs/sha256" },
+        "total": { "$ref": "#/$defs/count" },
+        "passed": { "$ref": "#/$defs/count" },
+        "failedCaseIds": {
+          "type": "array",
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/caseId" }
+        },
+        "conformant": { "type": "boolean" }
+      },
+      "if": {
+        "properties": { "kind": { "const": "decision" } },
+        "required": ["kind"]
+      },
+      "then": {
+        "required": ["policySha256"],
+        "properties": { "policySha256": true }
+      },
+      "else": { "not": { "required": ["policySha256"] } }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "uri", "sha256"],
+      "properties": {
+        "type": { "enum": ["log", "attestation", "signature", "artifact", "other"] },
+        "uri": { "$ref": "#/$defs/httpsUri" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "identity", "envelopeUri", "publicKeySha256"],
+      "properties": {
+        "method": { "const": "aiignore-ed25519-v0.1" },
+        "identity": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "issuer": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "envelopeUri": { "$ref": "#/$defs/httpsUri" },
+        "publicKeySha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

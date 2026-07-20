@@ -1,0 +1,63 @@
+{
+  "reportVersion": "0.1.0-alpha.1",
+  "status": "provisional",
+  "date": "2026-07-16",
+  "specification": "0.1",
+  "vectorsRevision": "0.1-codex-sandbox-2026-07-16",
+  "vectorsUri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/codex-sandbox.json",
+  "vectorsSha256": "ee3fb34c50b8dfbaaf7cf23cfbc5325213676cab03319fbde31a998956ccca0d",
+  "referenceImplementation": "aiignore-policy@0.1.0-alpha.1",
+  "sourceCommit": "e19602073949635d3c86ea6fc29cf5023dfa4540",
+  "sourceTreeDirty": false,
+  "runnerSha256": "dba36503f777b37b22c329a91ce5728bb88a1d0a270d19c7dcc006eff309cad7",
+  "policySha256": "8fff50bd4c75a2bf5f4bf860127b05e0de473c8b24daed3dd4ed27e9dfa1aecf",
+  "harness": {
+    "name": "OpenAI Codex CLI",
+    "version": "0.144.5"
+  },
+  "platform": {
+    "os": "darwin",
+    "version": "26.5.2",
+    "architecture": "x64",
+    "backend": "Seatbelt",
+    "build": "25F84",
+    "kernel": "Darwin 25.5.0"
+  },
+  "invocation": "node testbed/codex/run-live.mjs",
+  "modelInvoked": false,
+  "results": [
+    { "id": "allowed-public-read", "resource": "file", "operation": "read", "level": "sandbox", "passed": true },
+    { "id": "direct-private-read", "resource": "file", "operation": "read", "level": "sandbox", "passed": true },
+    { "id": "shell-private-read", "resource": "file", "operation": "read", "level": "sandbox", "passed": true },
+    { "id": "symlink-private-read", "resource": "file", "operation": "read", "level": "sandbox", "passed": true },
+    { "id": "private-write", "resource": "file", "operation": "write", "level": "sandbox", "passed": true },
+    { "id": "private-execute", "resource": "file", "operation": "execute", "level": "sandbox", "passed": true },
+    { "id": "private-discovery", "resource": "file", "operation": "discover", "level": "sandbox", "passed": true },
+    { "id": "git-history-private-read", "resource": "file", "operation": "read-history", "level": "sandbox", "passed": true },
+    {
+      "id": "archive-private-read",
+      "resource": "file",
+      "operation": "read-archive",
+      "level": "sandbox",
+      "passed": false,
+      "details": "pre-existing archive private read denied did not satisfy the required denial without disclosing the canary in the report."
+    },
+    { "id": "environment-inheritance", "resource": "environment", "operation": "inherit", "level": "tool", "passed": true },
+    { "id": "loopback-network", "resource": "network", "operation": "connect", "level": "sandbox", "passed": true }
+  ],
+  "notTested": [
+    "Codex built-in indexing/context exclusion",
+    "remote domain allow and deny rules",
+    "redirect and DNS rebinding behavior",
+    "environment filtering through a full model-driven Codex session",
+    "string mediation inside Codex",
+    "MCP, app, browser, and web-search tools",
+    "Linux bubblewrap, WSL2, and native Windows backends"
+  ],
+  "limitations": [
+    "The tested policy used an exact denied subtree compiled from private/**.",
+    "Environment filtering was supplied by the aiignore run launcher because Codex permission profiles do not filter inherited variables.",
+    "A pre-existing allowed archive containing copied protected bytes remained readable; path denial does not provide content provenance.",
+    "This unsigned local report is evidence, not a certification or portable guarantee."
+  ]
+}

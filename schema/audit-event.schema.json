@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ap-in-indy.github.io/aiignore/schema/0.1/audit-event.schema.json",
+  "title": "aiignore secret-safe audit event draft 0.1",
+  "description": "Minimal deterministic event emitted when an audit rule permits a covered boundary crossing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event", "formatVersion", "resource", "ruleId", "policyDigest"],
+  "properties": {
+    "event": { "const": "aiignore.audit" },
+    "formatVersion": { "const": "0.1" },
+    "resource": {
+      "type": "string",
+      "enum": ["file", "environment", "network", "string"]
+    },
+    "ruleId": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{0,63}$" },
+    "policyDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

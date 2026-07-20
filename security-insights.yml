@@ -1,0 +1,107 @@
+header:
+  schema-version: 2.2.0
+  last-updated: '2026-07-16'
+  last-reviewed: '2026-07-16'
+  url: https://raw.githubusercontent.com/ap-in-indy/aiignore/main/security-insights.yml
+  comment: >-
+    Maintainer-reported metadata for the experimental aiignore public alpha.
+    It is a snapshot, not a certification or third-party assessment.
+
+project:
+  name: aiignore
+  homepage: https://ap-in-indy.github.io/aiignore/
+  administrators:
+    - name: Alex
+      email: alex@alexdoes.it
+      social: https://github.com/ap-in-indy
+      primary: true
+  documentation:
+    quickstart-guide: https://github.com/ap-in-indy/aiignore#quick-start
+    detailed-guide: https://github.com/ap-in-indy/aiignore/blob/main/docs/enterprise-deployment.md
+    code-of-conduct: https://github.com/ap-in-indy/aiignore/blob/main/CODE_OF_CONDUCT.md
+    release-process: https://github.com/ap-in-indy/aiignore/blob/main/docs/maintainer-release-runbook.md
+    support-policy: https://github.com/ap-in-indy/aiignore/blob/main/SUPPORT.md
+  repositories:
+    - name: aiignore
+      url: https://github.com/ap-in-indy/aiignore
+      comment: Normative draft, reference implementation, vectors, and adapters.
+  vulnerability-reporting:
+    reports-accepted: true
+    bug-bounty-available: false
+    contact:
+      name: Alex
+      email: alex@alexdoes.it
+      primary: true
+    policy: https://github.com/ap-in-indy/aiignore/security/policy
+    in-scope:
+      - Parser safety and resource exhaustion
+      - Policy decision or canonicalization bypass
+      - Adapter or release-pipeline vulnerability
+    out-of-scope:
+      - Known limitations already disclosed in SECURITY.md and conformance reports
+
+repository:
+  url: https://github.com/ap-in-indy/aiignore
+  status: WIP
+  accepts-change-request: true
+  accepts-automated-change-request: true
+  no-third-party-packages: false
+  core-team:
+    - name: Alex
+      email: alex@alexdoes.it
+      social: https://github.com/ap-in-indy
+      primary: true
+  license:
+    url: https://github.com/ap-in-indy/aiignore/blob/main/LICENSE
+    expression: MIT
+  documentation:
+    contributing-guide: https://github.com/ap-in-indy/aiignore/blob/main/CONTRIBUTING.md
+    dependency-management-policy: https://github.com/ap-in-indy/aiignore/blob/main/docs/dependency-management.md
+    governance: https://github.com/ap-in-indy/aiignore/blob/main/docs/governance.md
+    review-policy: https://github.com/ap-in-indy/aiignore/blob/main/.github/pull_request_template.md
+    security-policy: https://github.com/ap-in-indy/aiignore/security/policy
+  security:
+    assessments:
+      self:
+        name: OSPS baseline release-candidate self-assessment
+        evidence: https://github.com/ap-in-indy/aiignore/blob/main/docs/security-baseline.md
+        date: '2026-07-16'
+        comment: >-
+          Internal assessment only. No independent implementation or security
+          audit has been published; unresolved controls are listed explicitly.
+    champions:
+      - name: Alex
+        email: alex@alexdoes.it
+        primary: true
+    tools:
+      - name: Gitleaks full-history secret scanning
+        type: SAST
+        version: 8.30.1
+        rulesets:
+          - built-in credential and private-key patterns
+          - every reachable Git commit
+        integration:
+          adhoc: true
+          ci: true
+          release: true
+        results: {}
+      - name: npm audit and registry signature verification
+        type: SCA
+        version: '11'
+        rulesets:
+          - production audit at low severity
+          - registry signatures and attestations
+          - approved SPDX production licenses
+        integration:
+          adhoc: true
+          ci: true
+          release: true
+        results: {}
+  release:
+    automated-pipeline: true
+    distribution-points:
+      - uri: https://github.com/ap-in-indy/aiignore/releases
+        comment: Signed-tag GitHub releases with checksums, SBOM, and attestations.
+      - uri: https://www.npmjs.com/package/aiignore
+        comment: Public package published by repository-bound OIDC after bootstrap.
+    changelog: https://github.com/ap-in-indy/aiignore/blob/main/CHANGELOG.md

@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ap-in-indy.github.io/aiignore/schema/0.1/readiness-report.schema.json",
+  "title": "aiignore reference readiness report draft 0.1",
+  "description": "Secret-safe operator summary of a valid policy and reference adapter compilation; not an enforcement or certification claim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "policyDigest",
+    "policyValid",
+    "deploymentEnforcement",
+    "defaults",
+    "ruleCounts",
+    "controlCounts",
+    "adapters",
+    "findings"
+  ],
+  "properties": {
+    "formatVersion": { "const": "0.1" },
+    "policyDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policyValid": { "const": true },
+    "deploymentEnforcement": { "const": "not-established" },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["files", "environment", "network", "strings"],
+      "properties": {
+        "files": { "enum": ["allow", "deny"] },
+        "environment": { "enum": ["allow", "deny"] },
+        "network": { "enum": ["allow", "deny"] },
+        "strings": { "enum": ["allow", "deny"] }
+      }
+    },
+    "ruleCounts": { "$ref": "#/$defs/resourceCounts" },
+    "controlCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fileDeny", "environmentFilter", "networkDeny", "networkAllow", "stringBoundary"],
+      "properties": {
+        "fileDeny": { "$ref": "#/$defs/count" },
+        "environmentFilter": { "$ref": "#/$defs/count" },
+        "networkDeny": { "$ref": "#/$defs/count" },
+        "networkAllow": { "$ref": "#/$defs/count" },
+        "stringBoundary": { "$ref": "#/$defs/count" }
+      }
+    },
+    "adapters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["codex", "gemini"],
+      "properties": {
+        "codex": { "$ref": "#/$defs/adapter" },
+        "gemini": { "$ref": "#/$defs/adapter" }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/finding" }
+    }
+  },
+  "$defs": {
+    "count": { "type": "integer", "minimum": 0, "maximum": 4096 },
+    "resourceCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["files", "environment", "network", "strings"],
+      "properties": {
+        "files": { "$ref": "#/$defs/count" },
+        "environment": { "$ref": "#/$defs/count" },
+        "network": { "$ref": "#/$defs/count" },
+        "strings": { "$ref": "#/$defs/count" }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compilationExact", "errorGaps", "warningGaps"],
+      "properties": {
+        "compilationExact": { "type": "boolean" },
+        "errorGaps": { "$ref": "#/$defs/gapCount" },
+        "warningGaps": { "$ref": "#/$defs/gapCount" }
+      }
+    },
+    "gapCount": { "type": "integer", "minimum": 0, "maximum": 4194304 },
+    "finding": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "severity", "message"],
+          "properties": {
+            "id": { "const": "deployment-not-established" },
+            "severity": { "const": "warning" },
+            "message": { "const": "Policy validity and adapter compilation do not prove that a harness or sandbox mediates every access path." }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "severity", "message"],
+          "properties": {
+            "id": { "const": "repository-policy-not-administrator-control" },
+            "severity": { "const": "info" },
+            "message": { "const": "A repository-controlled policy is developer intent, not a non-bypassable organization control." }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "severity", "message"],
+          "properties": {
+            "id": { "const": "network-default-allow" },
+            "severity": { "const": "warning" },
+            "message": { "const": "Unmatched network destinations are allowed by the policy default." }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "severity", "message"],
+          "properties": {
+            "id": { "const": "no-file-deny-rules" },
+            "severity": { "const": "warning" },
+            "message": { "const": "The policy has no file deny rule and unmatched files are allowed." }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "severity", "message"],
+          "properties": {
+            "id": { "const": "no-environment-filter-rules" },
+            "severity": { "const": "warning" },
+            "message": { "const": "The policy does not drop, redact, or deny any environment-variable name." }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "severity", "message"],
+          "properties": {
+            "id": { "const": "no-string-boundary-rules" },
+            "severity": { "const": "info" },
+            "message": { "const": "The policy has no string deny or redaction rule; string filtering remains optional defense in depth." }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "severity", "message"],
+          "properties": {
+            "id": { "const": "codex-compilation-partial" },
+            "severity": { "const": "warning" },
+            "message": { "const": "The Codex permission-profile translation has semantic gaps; inspect the full compilation report." }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "severity", "message"],
+          "properties": {
+            "id": { "const": "gemini-compilation-partial" },
+            "severity": { "const": "warning" },
+            "message": { "const": "The Gemini context/settings translation has semantic gaps; inspect the full compilation report." }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "revision": "0.1-codex-sandbox-2026-07-16",
+  "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/codex-sandbox.json",
+  "specification": "0.1",
+  "harness": "OpenAI Codex CLI",
+  "profile": "no-model-sandbox",
+  "cases": [
+    {
+      "id": "allowed-public-read",
+      "resource": "file",
+      "operation": "read",
+      "level": "sandbox",
+      "expectation": "allow",
+      "description": "An allowed workspace file remains readable and returns only its public canary."
+    },
+    {
+      "id": "direct-private-read",
+      "resource": "file",
+      "operation": "read",
+      "level": "sandbox",
+      "expectation": "deny",
+      "description": "A direct process read of a denied file fails without disclosing its canary."
+    },
+    {
+      "id": "shell-private-read",
+      "resource": "file",
+      "operation": "read",
+      "level": "sandbox",
+      "expectation": "deny",
+      "description": "A shell-mediated read of a denied file fails without disclosing its canary."
+    },
+    {
+      "id": "symlink-private-read",
+      "resource": "file",
+      "operation": "read",
+      "level": "sandbox",
+      "expectation": "deny",
+      "description": "An allowed-name symlink to a denied file cannot disclose the target canary."
+    },
+    {
+      "id": "private-write",
+      "resource": "file",
+      "operation": "write",
+      "level": "sandbox",
+      "expectation": "deny",
+      "description": "A process cannot create a file beneath a denied subtree."
+    },
+    {
+      "id": "private-execute",
+      "resource": "file",
+      "operation": "execute",
+      "level": "sandbox",
+      "expectation": "deny",
+      "description": "A process cannot execute a program beneath a denied subtree."
+    },
+    {
+      "id": "private-discovery",
+      "resource": "file",
+      "operation": "discover",
+      "level": "sandbox",
+      "expectation": "deny",
+      "description": "Directory discovery cannot enumerate a denied file name."
+    },
+    {
+      "id": "git-history-private-read",
+      "resource": "file",
+      "operation": "read-history",
+      "level": "sandbox",
+      "expectation": "deny",
+      "description": "A VCS object containing denied-path bytes cannot disclose the canary."
+    },
+    {
+      "id": "archive-private-read",
+      "resource": "file",
+      "operation": "read-archive",
+      "level": "sandbox",
+      "expectation": "deny",
+      "description": "An allowed pre-existing archive containing denied-path bytes cannot disclose the canary."
+    },
+    {
+      "id": "environment-inheritance",
+      "resource": "environment",
+      "operation": "inherit",
+      "level": "tool",
+      "expectation": "drop",
+      "description": "A dropped environment variable is absent from the sandboxed descendant process."
+    },
+    {
+      "id": "loopback-network",
+      "resource": "network",
+      "operation": "connect",
+      "level": "sandbox",
+      "expectation": "deny",
+      "description": "A denied loopback connection neither succeeds nor reaches the capture endpoint."
+    }
+  ]
+}

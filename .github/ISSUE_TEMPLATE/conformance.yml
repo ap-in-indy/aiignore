@@ -1,0 +1,62 @@
+name: Conformance or interoperability report
+description: Submit evidence from an independent implementation or harness integration.
+title: "Conformance: "
+labels: ["conformance"]
+body:
+  - type: dropdown
+    id: target
+    attributes:
+      label: Conformance target
+      description: Implementation covers parser/decision interoperability; harness covers live context/tool/sandbox mediation.
+      options:
+        - Implementation
+        - Harness
+    validations:
+      required: true
+  - type: input
+    id: implementation
+    attributes:
+      label: Implementation and version
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Public source or artifact URL
+    validations:
+      required: true
+  - type: input
+    id: vectors
+    attributes:
+      label: Manifest/vector revision and SHA-256
+    validations:
+      required: true
+  - type: textarea
+    id: platform
+    attributes:
+      label: Harness platform and backend, when applicable
+      description: Required for a harness claim; implementation-only reports may state “not applicable.”
+  - type: textarea
+    id: results
+    attributes:
+      label: Results and evidence
+      description: Link an implementation report matching schema/implementation-conformance-report.schema.json or a harness report matching schema/conformance-report.schema.json, plus any detached verification material.
+    validations:
+      required: true
+  - type: textarea
+    id: gaps
+    attributes:
+      label: Known gaps and untested paths
+    validations:
+      required: true
+  - type: checkboxes
+    id: claims
+    attributes:
+      label: Claim scope
+      options:
+        - label: I reported failures, unsupported paths, and partial mediation without collapsing them into a single compliance claim.
+          required: true
+        - label: I identified the exact conformance target and did not use implementation results as harness-enforcement evidence or vice versa.
+          required: true
+        - label: The report contains no credentials, private data, or secret-bearing patterns.
+          required: true

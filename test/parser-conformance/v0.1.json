@@ -1,0 +1,335 @@
+{
+  "revision": "0.1-parser-2026-07-16-2",
+  "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/parser.json",
+  "cases": [
+    {
+      "id": "minimal-policy",
+      "text": "aiignore: \"0.1\"\n",
+      "valid": true
+    },
+    {
+      "id": "utf8-bom",
+      "bytesBase64": "77u/YWlpZ25vcmU6ICIwLjEiCg==",
+      "valid": true
+    },
+    {
+      "id": "embedded-utf8-bom",
+      "text": "aiignore: \"0.1\"\nmetadata:\n  name: \"﻿embedded\"\n",
+      "valid": false,
+      "errorCode": "invalid_encoding"
+    },
+    {
+      "id": "repeated-leading-utf8-bom",
+      "text": "﻿﻿aiignore: \"0.1\"\n",
+      "valid": false,
+      "errorCode": "invalid_encoding"
+    },
+    {
+      "id": "crlf",
+      "text": "aiignore: \"0.1\"\r\nmetadata:\r\n  name: portable\r\n",
+      "valid": true
+    },
+    {
+      "id": "complete-syntax-and-options",
+      "text": "aiignore: \"0.1\"\nmetadata:\n  name: Complete\n  description: Every rule family and effect\ndefaults:\n  files: deny\n  environment: deny\n  network: deny\n  strings: deny\nrules:\n  files:\n    - {id: file-allow, effect: allow, priority: -1000, operations: [discover], paths: [\"/visible/?/**\"], except: [\"visible/x/private/\"]}\n    - {id: file-deny, effect: deny, operations: [index, read], paths: [\"**/[a-z].pem\"]}\n    - {id: file-audit, effect: audit, operations: [write], paths: [\"audit/**\"]}\n    - {id: file-read-only, effect: read-only, priority: 1000, operations: [execute], paths: [\"bin/**\"]}\n  environment:\n    - {id: env-allow, effect: allow, names: [PUBLIC_*]}\n    - {id: env-drop, effect: drop, names: [\"*_DROP\"]}\n    - {id: env-redact, effect: redact, names: [\"*_TOKEN\"], replacement: \"$1/$&/\\\\\"}\n    - {id: env-deny, effect: deny, names: [BLOCKED]}\n    - {id: env-audit, effect: audit, names: [AUDIT_*], except: [AUDIT_SAFE]}\n  network:\n    - {id: net-http, effect: allow, urls: [\"http://example.com:080/a?/b\"]}\n    - {id: net-https, effect: deny, urls: [\"https://*.example.com/**\"]}\n    - {id: net-ws, effect: audit, urls: [\"ws://127.0.0.1:0/**\"]}\n    - {id: net-wss, effect: allow, urls: [\"wss://[2001:db8::1]:65535/**\"]}\n  strings:\n    - {id: str-allow, effect: allow, scopes: [user_prompt, model_input, model_output], patterns: [{type: literal, value: ok, caseSensitive: false}]}\n    - {id: str-deny, effect: deny, scopes: [tool_input, tool_output, file_read], patterns: [{type: glob, value: \"*secret?\"}]}\n    - {id: str-redact, effect: redact, scopes: [file_write, environment_value, network_request], patterns: [{type: regex, value: \"KEY-[0-9]+\"}], replacement: \"$1/$&\"}\n    - {id: str-audit, effect: audit, scopes: [network_response, log], patterns: [{type: literal, value: audit}], except: [{type: literal, value: fixture}]}\n",
+      "valid": true
+    },
+    {
+      "id": "json-serialization",
+      "text": "{\"aiignore\":\"0.1\",\"metadata\":{\"name\":\"json-policy\"},\"rules\":{}}\n",
+      "valid": true
+    },
+    {
+      "id": "comments-single-quotes-and-block-scalar",
+      "text": "# policy comment\naiignore: '0.1'\nmetadata:\n  name: quoted\n  description: |\n    first line\n    second line\nrules: {}\n",
+      "valid": true
+    },
+    {
+      "id": "explicit-single-document-markers",
+      "text": "---\naiignore: \"0.1\"\nrules:\n  files: []\n  environment: []\n  network: []\n  strings: []\n...\n",
+      "valid": true
+    },
+    {
+      "id": "invalid-utf8",
+      "bytesBase64": "wyg=",
+      "valid": false,
+      "errorCode": "invalid_encoding"
+    },
+    {
+      "id": "policy-too-large",
+      "repeat": { "text": " ", "count": 1048577 },
+      "valid": false,
+      "errorCode": "policy_too_large"
+    },
+    {
+      "id": "missing-version",
+      "text": "metadata: {name: missing}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "wrong-version",
+      "text": "aiignore: \"0.2\"\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "unknown-root-property",
+      "text": "aiignore: \"0.1\"\nsurprise: true\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "unknown-rule-property",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: bad, effect: deny, paths: [x], surprise: true}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "duplicate-key",
+      "text": "aiignore: \"0.1\"\naiignore: \"0.1\"\n",
+      "valid": false,
+      "errorCode": "invalid_yaml"
+    },
+    {
+      "id": "multiple-documents",
+      "text": "aiignore: \"0.1\"\n---\naiignore: \"0.1\"\n",
+      "valid": false,
+      "errorCode": "invalid_yaml"
+    },
+    {
+      "id": "anchor",
+      "text": "aiignore: \"0.1\"\nmetadata: &meta {name: bad}\n",
+      "valid": false,
+      "errorCode": "unsafe_yaml"
+    },
+    {
+      "id": "alias",
+      "text": "aiignore: \"0.1\"\nmetadata: &meta {name: bad}\nrules: *meta\n",
+      "valid": false,
+      "errorCode": "unsafe_yaml"
+    },
+    {
+      "id": "explicit-tag",
+      "text": "aiignore: \"0.1\"\nmetadata: !!map {name: bad}\n",
+      "valid": false,
+      "errorCode": "unsafe_yaml"
+    },
+    {
+      "id": "custom-tag",
+      "text": "aiignore: \"0.1\"\nmetadata: !private {name: bad}\n",
+      "valid": false,
+      "errorCode": "unsafe_yaml"
+    },
+    {
+      "id": "merge-key",
+      "text": "aiignore: \"0.1\"\nmetadata:\n  <<: {name: bad}\n",
+      "valid": false,
+      "errorCode": "unsafe_yaml"
+    },
+    {
+      "id": "non-string-key",
+      "text": "aiignore: \"0.1\"\nmetadata:\n  1: bad\n",
+      "valid": false,
+      "errorCode": "unsafe_yaml"
+    },
+    {
+      "id": "duplicate-rule-id",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: same, effect: deny, paths: [x]}\n  network:\n    - {id: same, effect: deny, urls: [\"https://example.com/**\"]}\n",
+      "valid": false,
+      "errorCode": "duplicate_rule_id"
+    },
+    {
+      "id": "invalid-rule-id",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: Uppercase, effect: deny, paths: [x]}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "priority-below-minimum",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: low, effect: deny, priority: -1001, paths: [x]}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "priority-above-maximum",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: high, effect: deny, priority: 1001, paths: [x]}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "priority-not-integer",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: fraction, effect: deny, priority: 0.5, paths: [x]}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "empty-operations",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: empty, effect: deny, operations: [], paths: [x]}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "duplicate-operations",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: duplicate, effect: deny, operations: [read, read], paths: [x]}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "replacement-on-non-redact",
+      "text": "aiignore: \"0.1\"\nrules:\n  strings:\n    - {id: bad, effect: deny, patterns: [{type: literal, value: x}], replacement: hidden}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "environment-replacement-on-non-redact",
+      "text": "aiignore: \"0.1\"\nrules:\n  environment:\n    - {id: bad, effect: allow, names: [PUBLIC], replacement: hidden}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "empty-metadata-name",
+      "text": "aiignore: \"0.1\"\nmetadata: {name: \"\"}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "file-parent-traversal",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: bad, effect: deny, paths: [\"../private\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_pattern"
+    },
+    {
+      "id": "file-brace-expansion",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: bad, effect: deny, paths: [\"{a,b}\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_pattern"
+    },
+    {
+      "id": "environment-double-star",
+      "text": "aiignore: \"0.1\"\nrules:\n  environment:\n    - {id: bad, effect: drop, names: [\"SECRET**\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_pattern"
+    },
+    {
+      "id": "network-wildcard-ip",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://*.127.0.0.1/**\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-out-of-range-port",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://example.com:65536/**\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-empty-port",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://example.com:/**\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-fragment",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://example.com/a#b\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "regex-unsupported-backreference",
+      "text": "aiignore: \"0.1\"\nrules:\n  strings:\n    - id: bad\n      effect: deny\n      patterns: [{type: regex, value: \"(a)\\\\1\"}]\n",
+      "valid": false,
+      "errorCode": "invalid_string_pattern"
+    },
+    {
+      "id": "regex-empty-match",
+      "text": "aiignore: \"0.1\"\nrules:\n  strings:\n    - {id: bad, effect: redact, patterns: [{type: regex, value: \"a*\"}]}\n",
+      "valid": false,
+      "errorCode": "invalid_string_pattern"
+    },
+    {
+      "id": "regex-contextual-empty-match",
+      "text": "aiignore: \"0.1\"\nrules:\n  strings:\n    - {id: bad, effect: redact, patterns: [{type: regex, value: \"\\\\b\"}]}\n",
+      "valid": false,
+      "errorCode": "invalid_string_pattern"
+    },
+    {
+      "id": "glob-empty-match",
+      "text": "aiignore: \"0.1\"\nrules:\n  strings:\n    - {id: bad, effect: redact, patterns: [{type: glob, value: \"*\"}]}\n",
+      "valid": false,
+      "errorCode": "invalid_string_pattern"
+    },
+    {
+      "id": "empty-string-pattern",
+      "text": "aiignore: \"0.1\"\nrules:\n  strings:\n    - {id: bad, effect: deny, patterns: [{type: literal, value: \"\"}]}\n",
+      "valid": false,
+      "errorCode": "schema_validation"
+    },
+    {
+      "id": "file-unterminated-character-class",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: bad, effect: deny, paths: [\"file[\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_pattern"
+    },
+    {
+      "id": "file-descending-character-class",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: bad, effect: deny, paths: [\"[z-a].txt\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_pattern"
+    },
+    {
+      "id": "file-nonascii-character-class",
+      "text": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: bad, effect: deny, paths: [\"[é].txt\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_pattern"
+    },
+    {
+      "id": "network-encoded-separator",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://example.com/a%2fb\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-malformed-percent",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://example.com/%zz\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-percent-encoded-hostname",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://%65xample.com/**\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-invalid-dns-label",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://bad_.example/**\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-nonascii-path",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://example.com/café\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-query-marker-in-authority",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://example.com?discarded/**\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-backslash-in-authority",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://example.com\\\\discarded/**\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    },
+    {
+      "id": "network-control-in-authority",
+      "text": "aiignore: \"0.1\"\nrules:\n  network:\n    - {id: bad, effect: deny, urls: [\"https://example.com\\t/**\"]}\n",
+      "valid": false,
+      "errorCode": "invalid_network_pattern"
+    }
+  ]
+}

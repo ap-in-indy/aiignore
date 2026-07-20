@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this experimental specification or reference implementation, cite this repository and the exact release tag."
+title: "aiignore policy specification and reference implementation"
+type: software
+version: 0.1.0-alpha.1
+authors:
+  - family-names: Pritchard
+    given-names: Alex
+    email: alex@alexdoes.it
+repository-code: "https://github.com/ap-in-indy/aiignore"
+url: "https://ap-in-indy.github.io/aiignore/"
+license: MIT

@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-report.schema.json",
+  "title": "aiignore harness conformance report draft 0.1",
+  "description": "Scoped live harness and enforcement-backend evidence; parser and decision-engine interoperability uses the separate implementation-conformance report.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reportVersion",
+    "status",
+    "date",
+    "specification",
+    "vectorsRevision",
+    "vectorsUri",
+    "vectorsSha256",
+    "referenceImplementation",
+    "sourceCommit",
+    "sourceTreeDirty",
+    "runnerSha256",
+    "policySha256",
+    "harness",
+    "platform",
+    "invocation",
+    "modelInvoked",
+    "results",
+    "notTested",
+    "limitations"
+  ],
+  "properties": {
+    "reportVersion": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["provisional", "verified", "withdrawn"] },
+    "date": { "type": "string", "format": "date" },
+    "specification": { "type": "string", "const": "0.1" },
+    "vectorsRevision": { "type": "string", "minLength": 1 },
+    "vectorsUri": { "type": "string", "pattern": "^https://[^\\s]+$", "maxLength": 2048 },
+    "vectorsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "referenceImplementation": { "type": "string", "minLength": 1 },
+    "sourceCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "sourceTreeDirty": { "type": "boolean" },
+    "runnerSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "policySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "harness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["os", "version", "architecture", "backend"],
+      "properties": {
+        "os": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "build": { "type": "string" },
+        "kernel": { "type": "string" },
+        "architecture": { "type": "string", "minLength": 1 },
+        "backend": { "type": "string", "minLength": 1 }
+      }
+    },
+    "invocation": { "type": "string", "minLength": 1 },
+    "modelInvoked": { "type": "boolean" },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "resource", "operation", "level", "passed"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+          "resource": {
+            "type": "string",
+            "enum": ["file", "environment", "network", "string"]
+          },
+          "operation": { "type": "string", "minLength": 1 },
+          "level": { "type": "string", "enum": ["context", "tool", "sandbox"] },
+          "passed": { "type": "boolean" },
+          "details": { "type": "string" }
+        }
+      }
+    },
+    "notTested": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "uri", "sha256"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["log", "attestation", "signature", "artifact", "other"]
+          },
+          "uri": { "type": "string", "minLength": 1, "maxLength": 2048 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "identity", "envelopeUri", "publicKeySha256"],
+      "properties": {
+        "method": { "const": "aiignore-ed25519-v0.1" },
+        "identity": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "issuer": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "envelopeUri": {
+          "type": "string",
+          "pattern": "^https://[^\\s]+$",
+          "maxLength": 2048
+        },
+        "publicKeySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "withdrawalReason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": { "status": { "const": "verified" } },
+        "required": ["status"]
+      },
+      "then": {
+        "type": "object",
+        "required": ["verification", "evidence"],
+        "properties": {
+          "verification": true,
+          "evidence": true,
+          "sourceTreeDirty": { "const": false }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": { "status": { "const": "withdrawn" } },
+        "required": ["status"]
+      },
+      "then": {
+        "type": "object",
+        "required": ["withdrawalReason"],
+        "properties": { "withdrawalReason": true }
+      },
+      "else": {
+        "not": { "required": ["withdrawalReason"] }
+      }
+    }
+  ]
+}

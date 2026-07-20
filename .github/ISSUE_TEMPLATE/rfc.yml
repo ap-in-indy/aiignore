@@ -1,0 +1,33 @@
+name: Standards RFC
+description: Propose a normative aiignore policy change or interoperability clarification.
+title: "RFC: "
+labels: ["rfc"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Threat scenario or interoperability problem
+      description: Describe a concrete failure or incompatibility.
+    validations:
+      required: true
+  - type: textarea
+    id: semantics
+    attributes:
+      label: Proposed semantics
+      description: Define canonicalization, precedence, effects, outputs, and failure behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility and migration
+      description: Explain impacts on existing policies, implementations, and reports.
+    validations:
+      required: true
+  - type: textarea
+    id: conformance
+    attributes:
+      label: Conformance plan
+      description: List schema, vector, reference-test, adapter, and platform coverage.
+    validations:
+      required: true

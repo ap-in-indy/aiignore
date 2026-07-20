@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ap-in-indy.github.io/aiignore/schema/0.1/parser-vectors.schema.json",
+  "title": "aiignore language-neutral parser vectors draft 0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["revision", "uri", "cases"],
+  "properties": {
+    "revision": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "uri": { "type": "string", "pattern": "^https://[^\\s]+$", "maxLength": 2048 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10000,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$" },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "valid"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "text": { "type": "string", "maxLength": 1048576 },
+        "bytesBase64": {
+          "type": "string",
+          "maxLength": 1398104,
+          "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+        },
+        "repeat": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["text", "count"],
+          "properties": {
+            "text": { "type": "string", "minLength": 1, "maxLength": 1024 },
+            "count": { "type": "integer", "minimum": 1, "maximum": 2097152 }
+          }
+        },
+        "valid": { "type": "boolean" },
+        "errorCode": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" }
+      },
+      "oneOf": [
+        {
+          "required": ["text"],
+          "properties": { "text": {}, "bytesBase64": false, "repeat": false }
+        },
+        {
+          "required": ["bytesBase64"],
+          "properties": { "bytesBase64": {}, "text": false, "repeat": false }
+        },
+        {
+          "required": ["repeat"],
+          "properties": { "repeat": {}, "text": false, "bytesBase64": false }
+        }
+      ],
+      "allOf": [
+        {
+          "if": { "properties": { "valid": { "const": false } }, "required": ["valid"] },
+          "then": { "required": ["errorCode"], "properties": { "errorCode": {} } },
+          "else": { "properties": { "errorCode": false } }
+        }
+      ]
+    }
+  }
+}

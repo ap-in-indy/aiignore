@@ -1,0 +1,18 @@
+{
+  "name": "aiignore-codex",
+  "version": "0.1.0",
+  "description": "Supplemental Codex adapter for the experimental aiignore policy specification",
+  "author": {
+    "name": "aiignore contributors"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "aiignore for Codex",
+    "shortDescription": "Apply experimental .aiignore.yaml policy checks in Codex.",
+    "longDescription": "Compiles .aiignore.yaml filesystem and network rules into Codex permission profiles and adds supplemental tool-boundary checks.",
+    "developerName": "aiignore contributors",
+    "category": "Developer Tools",
+    "capabilities": ["security", "policy-enforcement"],
+    "defaultPrompt": "Validate this repository's .aiignore.yaml policy and report its Codex enforcement gaps."
+  }
+}

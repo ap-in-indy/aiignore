@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-vectors.schema.json",
+  "title": "aiignore language-neutral conformance vectors draft 0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["revision", "uri", "policy", "cases"],
+  "properties": {
+    "revision": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "uri": { "type": "string", "pattern": "^https://[^\\s]+$", "maxLength": 2048 },
+    "policy": { "type": "string", "minLength": 1, "maxLength": 1048576 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10000,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$" },
+    "candidate": { "type": "string", "maxLength": 1048576 },
+    "candidateRepeat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "count"],
+      "properties": {
+        "prefix": { "type": "string", "maxLength": 2048 },
+        "text": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "count": { "type": "integer", "minimum": 1, "maximum": 8388608 },
+        "suffix": { "type": "string", "maxLength": 2048 }
+      }
+    },
+    "candidateInput": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["candidate"],
+          "properties": { "candidate": {}, "candidateRepeat": false }
+        },
+        {
+          "type": "object",
+          "required": ["candidateRepeat"],
+          "properties": { "candidateRepeat": {}, "candidate": false }
+        }
+      ]
+    },
+    "ruleIdValue": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+    },
+    "ruleId": {
+      "oneOf": [
+        { "$ref": "#/$defs/ruleIdValue" },
+        { "type": "null" }
+      ]
+    },
+    "errorCode": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$"
+    },
+    "outcome": {
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["effect", "ruleId"],
+          "properties": {
+            "effect": true,
+            "ruleId": true,
+            "errorCode": false
+          }
+        },
+        {
+          "type": "object",
+          "required": ["errorCode"],
+          "properties": {
+            "errorCode": true,
+            "effect": false,
+            "ruleId": false,
+            "matched": false,
+            "output": false,
+            "appliedRuleIds": false
+          }
+        }
+      ]
+    },
+    "case": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "resource", "operation"],
+          "allOf": [
+            { "$ref": "#/$defs/outcome" },
+            { "$ref": "#/$defs/candidateInput" },
+            {
+              "if": { "not": { "required": ["errorCode"] } },
+              "then": {
+                "properties": {
+                  "operation": { "enum": ["discover", "index", "read", "write", "execute"] }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" },
+            "resource": { "const": "file" },
+            "candidate": { "$ref": "#/$defs/candidate" },
+            "candidateRepeat": { "$ref": "#/$defs/candidateRepeat" },
+            "effect": { "enum": ["allow", "deny", "audit"] },
+            "ruleId": { "$ref": "#/$defs/ruleId" },
+            "errorCode": { "$ref": "#/$defs/errorCode" },
+            "matched": { "type": ["string", "null"], "maxLength": 4096 },
+            "output": { "type": "string", "maxLength": 1048576 },
+            "appliedRuleIds": { "type": "array", "items": { "$ref": "#/$defs/ruleIdValue" } },
+            "operation": { "type": "string", "minLength": 1, "maxLength": 64 },
+            "caseInsensitive": { "type": "boolean", "default": false }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "resource"],
+          "allOf": [{ "$ref": "#/$defs/outcome" }, { "$ref": "#/$defs/candidateInput" }],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" },
+            "resource": { "const": "environment" },
+            "candidate": { "$ref": "#/$defs/candidate" },
+            "candidateRepeat": { "$ref": "#/$defs/candidateRepeat" },
+            "effect": { "enum": ["allow", "deny", "drop", "redact", "audit"] },
+            "ruleId": { "$ref": "#/$defs/ruleId" },
+            "errorCode": { "$ref": "#/$defs/errorCode" },
+            "matched": { "type": ["string", "null"], "maxLength": 4096 },
+            "output": { "type": "string", "maxLength": 1048576 },
+            "appliedRuleIds": { "type": "array", "items": { "$ref": "#/$defs/ruleIdValue" } },
+            "caseInsensitive": { "type": "boolean", "default": false }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "resource"],
+          "allOf": [{ "$ref": "#/$defs/outcome" }, { "$ref": "#/$defs/candidateInput" }],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" },
+            "resource": { "const": "network" },
+            "candidate": { "$ref": "#/$defs/candidate" },
+            "candidateRepeat": { "$ref": "#/$defs/candidateRepeat" },
+            "effect": { "enum": ["allow", "deny", "audit"] },
+            "ruleId": { "$ref": "#/$defs/ruleId" },
+            "errorCode": { "$ref": "#/$defs/errorCode" },
+            "matched": { "type": ["string", "null"], "maxLength": 4096 },
+            "output": { "type": "string", "maxLength": 1048576 },
+            "appliedRuleIds": { "type": "array", "items": { "$ref": "#/$defs/ruleIdValue" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "resource", "scope"],
+          "allOf": [
+            { "$ref": "#/$defs/outcome" },
+            { "$ref": "#/$defs/candidateInput" },
+            {
+              "if": { "not": { "required": ["errorCode"] } },
+              "then": {
+                "properties": {
+                  "scope": {
+                    "enum": [
+                      "user_prompt", "model_input", "model_output", "tool_input",
+                      "tool_output", "file_read", "file_write", "environment_value",
+                      "network_request", "network_response", "log"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" },
+            "resource": { "const": "string" },
+            "candidate": { "$ref": "#/$defs/candidate" },
+            "candidateRepeat": { "$ref": "#/$defs/candidateRepeat" },
+            "effect": { "enum": ["allow", "deny", "redact", "audit"] },
+            "ruleId": { "$ref": "#/$defs/ruleId" },
+            "errorCode": { "$ref": "#/$defs/errorCode" },
+            "matched": { "type": ["string", "null"], "maxLength": 4096 },
+            "output": { "type": "string", "maxLength": 1048576 },
+            "appliedRuleIds": { "type": "array", "items": { "$ref": "#/$defs/ruleIdValue" } },
+            "scope": { "type": "string", "minLength": 1, "maxLength": 64 }
+          }
+        }
+      ]
+    }
+  }
+}

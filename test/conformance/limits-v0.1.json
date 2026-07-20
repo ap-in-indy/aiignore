@@ -1,0 +1,70 @@
+{
+  "revision": "0.1-limits-2026-07-16",
+  "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/limits.json",
+  "policy": "aiignore: \"0.1\"\nrules:\n  files:\n    - {id: file-work-limit, effect: deny, paths: [B00, B01]}\n  environment:\n    - {id: environment-work-limit, effect: deny, names: [B00, B01]}\n  network:\n    - {id: network-work-limit, effect: deny, urls: [\"https://b00.invalid/**\", \"https://b01.invalid/**\", \"https://b02.invalid/**\", \"https://b03.invalid/**\"]}\n  strings:\n    - id: work-limit\n      effect: deny\n      scopes: [model_input]\n      patterns:\n        - {type: literal, value: B00}\n        - {type: literal, value: B01}\n        - {type: literal, value: B02}\n        - {type: literal, value: B03}\n        - {type: literal, value: B04}\n        - {type: literal, value: B05}\n        - {type: literal, value: B06}\n        - {type: literal, value: B07}\n        - {type: literal, value: B08}\n        - {type: literal, value: B09}\n        - {type: literal, value: B10}\n        - {type: literal, value: B11}\n        - {type: literal, value: B12}\n        - {type: literal, value: B13}\n        - {type: literal, value: B14}\n        - {type: literal, value: B15}\n        - {type: literal, value: B16}\n    - id: output-limit\n      effect: redact\n      scopes: [model_output]\n      patterns: [{type: regex, value: \"X{100}\"}]\n      replacement: RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR\n    - id: replacement-limit\n      effect: redact\n      scopes: [log]\n      patterns: [{type: literal, value: Y}]\n      replacement: \"\"\n",
+  "cases": [
+    {
+      "id": "file-candidate-byte-limit",
+      "resource": "file",
+      "candidateRepeat": { "text": "A", "count": 1048577 },
+      "operation": "read",
+      "errorCode": "candidate_too_large"
+    },
+    {
+      "id": "environment-candidate-byte-limit",
+      "resource": "environment",
+      "candidateRepeat": { "text": "A", "count": 1048577 },
+      "errorCode": "candidate_too_large"
+    },
+    {
+      "id": "network-candidate-byte-limit",
+      "resource": "network",
+      "candidateRepeat": { "text": "https://example.com/", "count": 60000 },
+      "errorCode": "candidate_too_large"
+    },
+    {
+      "id": "file-cumulative-work-limit",
+      "resource": "file",
+      "candidateRepeat": { "text": "A", "count": 1048576 },
+      "operation": "read",
+      "errorCode": "resource_work_limit"
+    },
+    {
+      "id": "environment-cumulative-work-limit",
+      "resource": "environment",
+      "candidateRepeat": { "text": "A", "count": 1048576 },
+      "errorCode": "resource_work_limit"
+    },
+    {
+      "id": "network-cumulative-work-limit",
+      "resource": "network",
+      "candidateRepeat": {
+        "prefix": "https://example.invalid/",
+        "text": "A",
+        "count": 262144
+      },
+      "errorCode": "resource_work_limit"
+    },
+    {
+      "id": "string-cumulative-work-limit",
+      "resource": "string",
+      "candidateRepeat": { "text": "A", "count": 8388608 },
+      "scope": "model_input",
+      "errorCode": "string_work_limit"
+    },
+    {
+      "id": "string-transformed-output-limit",
+      "resource": "string",
+      "candidateRepeat": { "text": "X", "count": 8388600 },
+      "scope": "model_output",
+      "errorCode": "string_output_too_large"
+    },
+    {
+      "id": "string-replacement-count-limit",
+      "resource": "string",
+      "candidateRepeat": { "text": "Y", "count": 100001 },
+      "scope": "log",
+      "errorCode": "string_replacement_limit"
+    }
+  ]
+}

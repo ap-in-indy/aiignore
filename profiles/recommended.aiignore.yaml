@@ -1,0 +1,105 @@
+aiignore: "0.1"
+
+metadata:
+  name: recommended-secrets-baseline
+  description: Conservative starting policy; tune false positives before enforcing.
+
+defaults:
+  files: allow
+  environment: allow
+  network: allow
+  strings: allow
+
+rules:
+  files:
+    - id: credential-files
+      effect: deny
+      paths:
+        - "**/.env*"
+        - "**/.netrc"
+        - "**/.npmrc"
+        - "**/.pypirc"
+        - "**/*.pem"
+        - "**/*.key"
+        - "**/*.p12"
+        - "**/*.pfx"
+        - "**/credentials.json"
+        - "**/service-account*.json"
+        - "**/.aws/credentials"
+        - "**/.config/gcloud/**"
+        - "**/.ssh/**"
+      except:
+        - "**/.env.example"
+        - "**/.env.sample"
+        - "**/.env.template"
+
+  environment:
+    - id: credential-environment
+      effect: drop
+      names:
+        - "*_API_KEY"
+        - "*_ACCESS_KEY"
+        - "*_PRIVATE_KEY"
+        - "*_CLIENT_SECRET"
+        - "*_PASSWORD"
+        - "*_PASSWD"
+        - "*_TOKEN"
+        - "*_CREDENTIALS"
+        - "AWS_SECRET_ACCESS_KEY"
+        - "AWS_SESSION_TOKEN"
+        - "GITHUB_TOKEN"
+        - "GH_TOKEN"
+        - "NPM_TOKEN"
+      except:
+        - "PUBLIC_*"
+        - "*_TOKEN_TTL"
+        - "*_TOKEN_TYPE"
+        - "*_PASSWORD_MIN_LENGTH"
+
+  strings:
+    - id: pem-private-key
+      effect: redact
+      scopes: [model_input, tool_output, file_read, file_write, network_request, log]
+      patterns:
+        - type: regex
+          value: "-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----"
+      replacement: "[REDACTED:pem-private-key]"
+
+    - id: provider-access-token
+      effect: redact
+      scopes: [model_input, tool_output, file_read, file_write, network_request, log]
+      patterns:
+        - type: regex
+          value: "gh[pousr]_[A-Za-z0-9]{36,255}"
+        - type: regex
+          value: "github_pat_[A-Za-z0-9_]{40,255}"
+        - type: regex
+          value: "AKIA[0-9A-Z]{16}"
+      replacement: "[REDACTED:provider-access-token]"
+
+    - id: bearer-credential
+      effect: redact
+      scopes: [model_input, tool_output, file_read, file_write, network_request, log]
+      patterns:
+        - type: regex
+          value: "Bearer[ \\t]+[A-Za-z0-9._~+/-]{16,}"
+          caseSensitive: false
+      replacement: "Bearer [REDACTED]"
+
+    - id: credential-in-url
+      effect: redact
+      scopes: [model_input, tool_output, file_read, file_write, network_request, log]
+      patterns:
+        - type: regex
+          value: "https?://[^/[:space:]:@]+:[^/[:space:]@]+@"
+          caseSensitive: false
+      replacement: "https://[REDACTED]@"
+
+    - id: generic-secret-assignment
+      effect: redact
+      scopes: [model_input, tool_output, file_read, file_write, network_request, log]
+      patterns:
+        - type: regex
+          value: "(api[_-]?key|client[_-]?secret|password|passwd|secret|token)[ \\t]*[:=][ \\t]*[^ \\t\\r\\n,;]{8,}"
+          caseSensitive: false
+      replacement: "[REDACTED:secret-assignment]"

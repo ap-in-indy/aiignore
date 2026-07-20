@@ -1,0 +1,143 @@
+{
+  "formatVersion": "0.1",
+  "repository": "ap-in-indy/aiignore",
+  "repositorySettings": {
+    "visibility": "public",
+    "defaultBranch": "main",
+    "issues": true,
+    "discussions": true,
+    "deleteBranchOnMerge": true,
+    "allowMergeCommit": false,
+    "allowRebaseMerge": false,
+    "allowSquashMerge": true,
+    "allowAutoMerge": false,
+    "webCommitSignoffRequired": true,
+    "immutableReleases": true,
+    "privateVulnerabilityReporting": true,
+    "vulnerabilityAlerts": true,
+    "automatedSecurityFixes": true,
+    "secretScanning": true,
+    "secretScanningPushProtection": true,
+    "codeScanning": true,
+    "dependabotSecurityUpdates": true,
+    "defaultWorkflowPermissions": "read",
+    "workflowsCanApprovePullRequests": false,
+    "pages": {
+      "buildType": "workflow",
+      "public": true,
+      "httpsEnforced": true
+    }
+  },
+  "rulesets": [
+    {
+      "name": "Protect main",
+      "target": "branch",
+      "enforcement": "active",
+      "bypass_actors": [],
+      "conditions": {
+        "ref_name": {
+          "include": ["refs/heads/main"],
+          "exclude": []
+        }
+      },
+      "rules": [
+        { "type": "deletion" },
+        { "type": "non_fast_forward" },
+        { "type": "required_signatures" },
+        {
+          "type": "pull_request",
+          "parameters": {
+            "allowed_merge_methods": ["squash"],
+            "dismiss_stale_reviews_on_push": false,
+            "require_code_owner_review": false,
+            "require_last_push_approval": false,
+            "required_approving_review_count": 0,
+            "required_review_thread_resolution": true
+          }
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "do_not_enforce_on_create": false,
+            "strict_required_status_checks_policy": true,
+            "required_status_checks": [
+              { "context": "Node 20 on ubuntu-latest", "integration_id": 15368 },
+              { "context": "Node 24 on ubuntu-latest", "integration_id": 15368 },
+              { "context": "Node 24 on macos-latest", "integration_id": 15368 },
+              { "context": "Node 24 on windows-latest", "integration_id": 15368 },
+              { "context": "package", "integration_id": 15368 },
+              { "context": "DCO sign-off", "integration_id": 15368 },
+              { "context": "fuzz", "integration_id": 15368 },
+              { "context": "Gitleaks full history", "integration_id": 15368 },
+              { "context": "dependency-review", "integration_id": 15368 },
+              { "context": "Analyze JavaScript and TypeScript", "integration_id": 15368 }
+            ]
+          }
+        },
+        {
+          "type": "code_scanning",
+          "parameters": {
+            "code_scanning_tools": [
+              {
+                "tool": "CodeQL",
+                "alerts_threshold": "errors",
+                "security_alerts_threshold": "high_or_higher"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Protect release tags",
+      "target": "tag",
+      "enforcement": "active",
+      "bypass_actors": [],
+      "conditions": {
+        "ref_name": {
+          "include": ["refs/tags/v*"],
+          "exclude": []
+        }
+      },
+      "rules": [
+        { "type": "update" },
+        { "type": "deletion" }
+      ]
+    },
+    {
+      "name": "Restrict release tag creation",
+      "target": "tag",
+      "enforcement": "active",
+      "bypass_actors": [
+        {
+          "actor_id": 93954900,
+          "actor_type": "User",
+          "bypass_mode": "always"
+        }
+      ],
+      "conditions": {
+        "ref_name": {
+          "include": ["refs/tags/v*"],
+          "exclude": []
+        }
+      },
+      "rules": [
+        { "type": "creation" }
+      ]
+    }
+  ],
+  "releaseEnvironment": {
+    "name": "release",
+    "preventSelfReview": false,
+    "canAdminsBypass": false,
+    "requiredReviewers": [],
+    "requiredReviewerMinimum": 0,
+    "protectedBranches": false,
+    "customBranchPolicies": true,
+    "deploymentPolicies": [
+      { "name": "v*", "type": "tag" }
+    ],
+    "secrets": [],
+    "variables": []
+  }
+}

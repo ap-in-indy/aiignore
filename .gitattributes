@@ -1,0 +1,14 @@
+# Normative specifications, schemas, vectors, source, and generated text must
+# have identical bytes in every checkout so published SHA-256 values remain
+# portable across Windows, macOS, and Linux.
+* text=auto eol=lf
+
+# Preserve binary assets without text conversion if any are added later.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.gz binary

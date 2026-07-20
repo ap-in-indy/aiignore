@@ -1,0 +1,47 @@
+{
+  "revision": "0.1-options-2026-07-16-2",
+  "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/options.json",
+  "policy": "aiignore: \"0.1\"\ndefaults:\n  files: deny\n  environment: deny\n  network: deny\n  strings: deny\nrules:\n  files:\n    - id: file-audit\n      effect: audit\n      operations: [discover, index, read, write, execute]\n      paths: [\"audit/**\"]\n    - id: generated\n      effect: read-only\n      paths: [\"generated/**\"]\n    - {id: root-basename, effect: allow, paths: [\"root-name.txt\"]}\n    - {id: any-depth-basename, effect: allow, paths: [\"**/any-name.txt\"]}\n    - {id: explicit-root, effect: allow, paths: [\"/rooted/**\"]}\n  environment:\n    - {id: env-allow, effect: allow, names: [ALLOW_*]}\n    - {id: env-drop, effect: drop, names: [DROP_*]}\n    - {id: env-redact, effect: redact, names: [REDACT_*], replacement: hidden}\n    - {id: env-deny, effect: deny, names: [DENY_*]}\n    - {id: env-audit, effect: audit, names: [AUDIT_*]}\n  network:\n    - {id: http-allow, effect: allow, urls: [\"http://example.test/**\"]}\n    - {id: https-deny, effect: deny, urls: [\"https://example.test/**\"]}\n    - {id: ws-audit, effect: audit, urls: [\"ws://example.test/**\"]}\n    - {id: wss-allow, effect: allow, urls: [\"wss://example.test/**\"]}\n  strings:\n    - {id: str-allow, effect: allow, patterns: [{type: literal, value: ALLOW}]}\n    - {id: str-deny, effect: deny, patterns: [{type: literal, value: DENY}]}\n    - {id: str-audit, effect: audit, patterns: [{type: literal, value: AUDIT}]}\n    - {id: str-negated-class, effect: allow, patterns: [{type: glob, value: \"X[!A-C]Y\"}]}\n    - {id: redact-first, effect: redact, priority: 10, patterns: [{type: regex, value: \"FIRST\"}], replacement: \"$1/$&/\\\\\"}\n    - {id: redact-second, effect: redact, priority: 5, patterns: [{type: glob, value: \"SECOND\"}], replacement: \"[SECOND]\"}\n    - {id: overlap-lower, effect: redact, priority: 1, patterns: [{type: literal, value: SECRET}], replacement: lower}\n    - {id: overlap-higher, effect: redact, priority: 2, patterns: [{type: literal, value: SECRET-LONG}, {type: literal, value: SECRET}], replacement: higher}\n    - {id: replacement-only, effect: redact, priority: 3, patterns: [{type: literal, value: higher}], replacement: unexpected}\n",
+  "cases": [
+    {"id":"file-discover-audit","resource":"file","candidate":"audit/item","operation":"discover","effect":"audit","ruleId":"file-audit","matched":"audit/**"},
+    {"id":"file-index-audit","resource":"file","candidate":"audit/item","operation":"index","effect":"audit","ruleId":"file-audit","matched":"audit/**"},
+    {"id":"file-read-audit","resource":"file","candidate":"audit/item","operation":"read","effect":"audit","ruleId":"file-audit","matched":"audit/**"},
+    {"id":"file-write-audit","resource":"file","candidate":"audit/item","operation":"write","effect":"audit","ruleId":"file-audit","matched":"audit/**"},
+    {"id":"file-execute-audit","resource":"file","candidate":"audit/item","operation":"execute","effect":"audit","ruleId":"file-audit","matched":"audit/**"},
+    {"id":"file-read-only-discover","resource":"file","candidate":"generated/item","operation":"discover","effect":"allow","ruleId":"generated","matched":"generated/**"},
+    {"id":"file-read-only-index","resource":"file","candidate":"generated/item","operation":"index","effect":"allow","ruleId":"generated","matched":"generated/**"},
+    {"id":"file-read-only-read","resource":"file","candidate":"generated/item","operation":"read","effect":"allow","ruleId":"generated","matched":"generated/**"},
+    {"id":"file-read-only-write","resource":"file","candidate":"generated/item","operation":"write","effect":"deny","ruleId":"generated","matched":"generated/**"},
+    {"id":"file-read-only-execute","resource":"file","candidate":"generated/item","operation":"execute","effect":"deny","ruleId":"generated","matched":"generated/**"},
+    {"id":"file-root-basename-match","resource":"file","candidate":"root-name.txt","operation":"read","effect":"allow","ruleId":"root-basename","matched":"root-name.txt"},
+    {"id":"file-root-basename-not-implicit-descendant","resource":"file","candidate":"nested/root-name.txt","operation":"read","effect":"deny","ruleId":null,"matched":null},
+    {"id":"file-any-depth-basename-root","resource":"file","candidate":"any-name.txt","operation":"read","effect":"allow","ruleId":"any-depth-basename","matched":"**/any-name.txt"},
+    {"id":"file-any-depth-basename-descendant","resource":"file","candidate":"nested/any-name.txt","operation":"read","effect":"allow","ruleId":"any-depth-basename","matched":"**/any-name.txt"},
+    {"id":"file-leading-root-marker","resource":"file","candidate":"rooted/item","operation":"read","effect":"allow","ruleId":"explicit-root","matched":"/rooted/**"},
+    {"id":"file-default-deny","resource":"file","candidate":"other/item","operation":"read","effect":"deny","ruleId":null,"matched":null},
+
+    {"id":"environment-allow","resource":"environment","candidate":"ALLOW_VALUE","effect":"allow","ruleId":"env-allow","matched":"ALLOW_*"},
+    {"id":"environment-drop","resource":"environment","candidate":"DROP_VALUE","effect":"drop","ruleId":"env-drop","matched":"DROP_*"},
+    {"id":"environment-redact","resource":"environment","candidate":"REDACT_VALUE","effect":"redact","ruleId":"env-redact","matched":"REDACT_*","output":"hidden"},
+    {"id":"environment-deny","resource":"environment","candidate":"DENY_VALUE","effect":"deny","ruleId":"env-deny","matched":"DENY_*"},
+    {"id":"environment-audit","resource":"environment","candidate":"AUDIT_VALUE","effect":"audit","ruleId":"env-audit","matched":"AUDIT_*"},
+    {"id":"environment-default-deny","resource":"environment","candidate":"OTHER_VALUE","effect":"deny","ruleId":null,"matched":null},
+
+    {"id":"network-http-allow","resource":"network","candidate":"http://example.test/a","effect":"allow","ruleId":"http-allow","matched":"http://example.test/**"},
+    {"id":"network-https-deny","resource":"network","candidate":"https://example.test/a","effect":"deny","ruleId":"https-deny","matched":"https://example.test/**"},
+    {"id":"network-ws-audit","resource":"network","candidate":"ws://example.test/a","effect":"audit","ruleId":"ws-audit","matched":"ws://example.test/**"},
+    {"id":"network-wss-allow","resource":"network","candidate":"wss://example.test/a","effect":"allow","ruleId":"wss-allow","matched":"wss://example.test/**"},
+    {"id":"network-omitted-path-normalizes-root","resource":"network","candidate":"wss://example.test","effect":"allow","ruleId":"wss-allow","matched":"wss://example.test/**"},
+    {"id":"network-default-deny","resource":"network","candidate":"https://other.test/a","effect":"deny","ruleId":null,"matched":null},
+
+    {"id":"string-allow","resource":"string","candidate":"ALLOW","scope":"tool_output","effect":"allow","ruleId":"str-allow","matched":"literal"},
+    {"id":"string-deny","resource":"string","candidate":"DENY","scope":"tool_output","effect":"deny","ruleId":"str-deny","matched":"literal"},
+    {"id":"string-audit","resource":"string","candidate":"AUDIT","scope":"tool_output","effect":"audit","ruleId":"str-audit","matched":"literal"},
+    {"id":"string-glob-negated-class-match","resource":"string","candidate":"XZY","scope":"tool_output","effect":"allow","ruleId":"str-negated-class","matched":"glob"},
+    {"id":"string-glob-negated-class-exclusion","resource":"string","candidate":"XBY","scope":"tool_output","effect":"deny","ruleId":null,"matched":null},
+    {"id":"string-redaction-literal-replacement","resource":"string","candidate":"FIRST","scope":"tool_output","effect":"redact","ruleId":"redact-first","matched":"regex","output":"$1/$&/\\","appliedRuleIds":["redact-first"]},
+    {"id":"string-composed-redaction","resource":"string","candidate":"FIRST SECOND","scope":"tool_output","effect":"redact","ruleId":"redact-first","matched":"regex","output":"$1/$&/\\ [SECOND]","appliedRuleIds":["redact-first","redact-second"]},
+    {"id":"string-overlap-original-match-set","resource":"string","candidate":"SECRET-LONG","scope":"tool_output","effect":"redact","ruleId":"overlap-higher","matched":"literal","output":"higher","appliedRuleIds":["overlap-higher","overlap-lower"]},
+    {"id":"string-default-deny","resource":"string","candidate":"OTHER","scope":"tool_output","effect":"deny","ruleId":null,"matched":null}
+  ]
+}

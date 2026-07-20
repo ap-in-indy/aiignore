@@ -1,0 +1,19 @@
+{
+  "revision": "0.1.0-alpha.1",
+  "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/decisions.json",
+  "policy": "aiignore: \"0.1\"\ndefaults: {network: deny}\nrules:\n  files:\n    - {id: secrets, effect: deny, paths: [\"**/.env*\", \"private/**\"], except: [\"**/.env.example\"]}\n    - {id: generated, effect: read-only, paths: [\"generated/**\"]}\n  environment:\n    - {id: credentials, effect: drop, names: [\"*_TOKEN\"], except: [\"PUBLIC_*\"]}\n  network:\n    - {id: docs, effect: allow, urls: [\"https://**.example.com/docs/**\"]}\n  strings:\n    - {id: marker, effect: redact, scopes: [tool_output], patterns: [{type: literal, value: \"SECRET-MARKER\"}]}\n",
+  "cases": [
+    { "id": "file-root-dotenv", "resource": "file", "candidate": ".env", "operation": "read", "effect": "deny", "ruleId": "secrets" },
+    { "id": "file-nested-dotenv", "resource": "file", "candidate": "app/.env.local", "operation": "read", "effect": "deny", "ruleId": "secrets" },
+    { "id": "file-exception", "resource": "file", "candidate": "app/.env.example", "operation": "read", "effect": "allow", "ruleId": null },
+    { "id": "file-read-only-read", "resource": "file", "candidate": "generated/api.ts", "operation": "read", "effect": "allow", "ruleId": "generated" },
+    { "id": "file-read-only-write", "resource": "file", "candidate": "generated/api.ts", "operation": "write", "effect": "deny", "ruleId": "generated" },
+    { "id": "env-drop", "resource": "environment", "candidate": "GITHUB_TOKEN", "effect": "drop", "ruleId": "credentials" },
+    { "id": "env-exception", "resource": "environment", "candidate": "PUBLIC_TOKEN", "effect": "allow", "ruleId": null },
+    { "id": "network-apex", "resource": "network", "candidate": "https://example.com/docs/start", "effect": "allow", "ruleId": "docs" },
+    { "id": "network-subdomain", "resource": "network", "candidate": "https://api.example.com/docs/start", "effect": "allow", "ruleId": "docs" },
+    { "id": "network-path-deny", "resource": "network", "candidate": "https://example.com/upload", "effect": "deny", "ruleId": null },
+    { "id": "string-scope-redact", "resource": "string", "candidate": "value=SECRET-MARKER", "scope": "tool_output", "effect": "redact", "ruleId": "marker", "output": "value=[REDACTED:marker]" },
+    { "id": "string-other-scope", "resource": "string", "candidate": "value=SECRET-MARKER", "scope": "model_output", "effect": "allow", "ruleId": null }
+  ]
+}

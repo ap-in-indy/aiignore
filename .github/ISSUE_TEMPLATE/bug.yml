@@ -1,0 +1,56 @@
+name: Reference implementation bug
+description: Report a reproducible parser, decision, CLI, adapter, or documentation defect.
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Never paste credentials, private policies, customer data, or unredacted harness transcripts. Use Security Advisories for vulnerabilities."
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: 0.1.0-alpha.1 or full commit SHA
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Runtime and platform
+      placeholder: Node 24.5.0, Windows 11 x64
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options: [Parser, Decision engine, CLI, Conformance runner, Codex adapter, Gemini adapter, Schema or specification, Documentation]
+    validations:
+      required: true
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: Minimal synthetic reproducer
+      description: Include a policy and command using synthetic values only.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I used only synthetic test data and removed secrets and personal information.
+          required: true

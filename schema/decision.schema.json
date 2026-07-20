@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ap-in-indy.github.io/aiignore/schema/0.1/decision.schema.json",
+  "title": "aiignore portable decision draft 0.1",
+  "description": "Exact interoperable decision object emitted by an aiignore draft 0.1 policy engine.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["resource", "effect", "ruleId", "matched", "reason", "policyDigest"],
+  "properties": {
+    "resource": {
+      "type": "string",
+      "enum": ["file", "environment", "network", "string"]
+    },
+    "effect": {
+      "type": "string",
+      "enum": ["allow", "deny", "drop", "redact", "audit"]
+    },
+    "ruleId": {
+      "oneOf": [
+        { "$ref": "#/$defs/ruleId" },
+        { "type": "null" }
+      ]
+    },
+    "matched": {
+      "oneOf": [
+        { "type": "string", "minLength": 1, "maxLength": 4096 },
+        { "type": "null" }
+      ]
+    },
+    "reason": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "policyDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "output": { "type": "string", "maxLength": 16777216 },
+    "appliedRuleIds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/ruleId" }
+    }
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "properties": { "ruleId": { "type": "null" }, "matched": { "type": "null" } },
+          "required": ["ruleId", "matched"]
+        },
+        {
+          "properties": {
+            "ruleId": { "$ref": "#/$defs/ruleId" },
+            "matched": { "type": "string", "minLength": 1, "maxLength": 4096 }
+          },
+          "required": ["ruleId", "matched"]
+        }
+      ]
+    },
+    {
+      "if": { "properties": { "resource": { "const": "file" } }, "required": ["resource"] },
+      "then": {
+        "properties": { "effect": { "enum": ["allow", "deny", "audit"] } },
+        "not": {
+          "anyOf": [
+            { "$ref": "#/$defs/hasOutput" },
+            { "$ref": "#/$defs/hasAppliedRuleIds" }
+          ]
+        }
+      }
+    },
+    {
+      "if": { "properties": { "resource": { "const": "environment" } }, "required": ["resource"] },
+      "then": {
+        "properties": { "effect": { "enum": ["allow", "deny", "drop", "redact", "audit"] } },
+        "allOf": [
+          {
+            "if": { "properties": { "effect": { "const": "redact" } }, "required": ["effect"] },
+            "then": { "$ref": "#/$defs/hasOutput" },
+            "else": { "not": { "$ref": "#/$defs/hasOutput" } }
+          },
+          { "not": { "$ref": "#/$defs/hasAppliedRuleIds" } }
+        ]
+      }
+    },
+    {
+      "if": { "properties": { "resource": { "const": "network" } }, "required": ["resource"] },
+      "then": {
+        "properties": { "effect": { "enum": ["allow", "deny", "audit"] } },
+        "not": {
+          "anyOf": [
+            { "$ref": "#/$defs/hasOutput" },
+            { "$ref": "#/$defs/hasAppliedRuleIds" }
+          ]
+        }
+      }
+    },
+    {
+      "if": { "properties": { "resource": { "const": "string" } }, "required": ["resource"] },
+      "then": {
+        "properties": {
+          "effect": { "enum": ["allow", "deny", "redact", "audit"] },
+          "matched": {
+            "oneOf": [
+              { "enum": ["literal", "glob", "regex"] },
+              { "type": "null" }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "effect": { "const": "redact" } }, "required": ["effect"] },
+            "then": {
+              "allOf": [
+                { "$ref": "#/$defs/hasOutput" },
+                { "$ref": "#/$defs/hasAppliedRuleIds" }
+              ]
+            },
+            "else": {
+              "not": {
+                "anyOf": [
+                  { "$ref": "#/$defs/hasOutput" },
+                  { "$ref": "#/$defs/hasAppliedRuleIds" }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "ruleId": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{0,63}$" },
+    "hasOutput": {
+      "type": "object",
+      "properties": { "output": {} },
+      "required": ["output"]
+    },
+    "hasAppliedRuleIds": {
+      "type": "object",
+      "properties": { "appliedRuleIds": {} },
+      "required": ["appliedRuleIds"]
+    }
+  }
+}

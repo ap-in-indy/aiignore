@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ap-in-indy.github.io/aiignore/schema/0.1/aiignore.schema.json",
+  "title": "aiignore structured policy draft 0.1",
+  "description": "Schema for the experimental .aiignore.yaml structured policy format.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["aiignore"],
+  "properties": {
+    "aiignore": { "const": "0.1" },
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "defaults": { "$ref": "#/$defs/defaults" },
+    "rules": { "$ref": "#/$defs/rules" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 1000,
+      "default": 0
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 2048 }
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "files": { "$ref": "#/$defs/defaultEffect" },
+        "environment": { "$ref": "#/$defs/defaultEffect" },
+        "network": { "$ref": "#/$defs/defaultEffect" },
+        "strings": { "$ref": "#/$defs/defaultEffect" }
+      }
+    },
+    "defaultEffect": {
+      "type": "string",
+      "enum": ["allow", "deny"],
+      "default": "allow"
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": { "$ref": "#/$defs/fileRule" }
+        },
+        "environment": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": { "$ref": "#/$defs/environmentRule" }
+        },
+        "network": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": { "$ref": "#/$defs/networkRule" }
+        },
+        "strings": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": { "$ref": "#/$defs/stringRule" }
+        }
+      }
+    },
+    "fileRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "effect", "paths"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny", "audit", "read-only"]
+        },
+        "priority": { "$ref": "#/$defs/priority" },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["discover", "index", "read", "write", "execute"]
+          }
+        },
+        "paths": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "except": { "$ref": "#/$defs/nonEmptyStringArray" }
+      }
+    },
+    "environmentRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "effect", "names"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "drop", "redact", "deny", "audit"]
+        },
+        "priority": { "$ref": "#/$defs/priority" },
+        "names": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "except": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "replacement": { "type": "string", "maxLength": 1024 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "effect": { "const": "redact" } } },
+          "then": {},
+          "else": {
+            "not": {
+              "properties": { "replacement": {} },
+              "required": ["replacement"]
+            }
+          }
+        }
+      ]
+    },
+    "networkRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "effect", "urls"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny", "audit"]
+        },
+        "priority": { "$ref": "#/$defs/priority" },
+        "urls": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "except": { "$ref": "#/$defs/nonEmptyStringArray" }
+      }
+    },
+    "stringRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "effect", "patterns"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny", "redact", "audit"]
+        },
+        "priority": { "$ref": "#/$defs/priority" },
+        "scopes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/stringScope" }
+        },
+        "patterns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "items": { "$ref": "#/$defs/stringPattern" }
+        },
+        "except": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "items": { "$ref": "#/$defs/stringPattern" }
+        },
+        "replacement": { "type": "string", "maxLength": 1024 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "effect": { "const": "redact" } } },
+          "then": {},
+          "else": {
+            "not": {
+              "properties": { "replacement": {} },
+              "required": ["replacement"]
+            }
+          }
+        }
+      ]
+    },
+    "stringScope": {
+      "type": "string",
+      "enum": [
+        "user_prompt",
+        "model_input",
+        "model_output",
+        "tool_input",
+        "tool_output",
+        "file_read",
+        "file_write",
+        "environment_value",
+        "network_request",
+        "network_response",
+        "log"
+      ]
+    },
+    "stringPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "type": "string", "enum": ["literal", "glob", "regex"] },
+        "value": { "$ref": "#/$defs/nonEmptyString" },
+        "caseSensitive": { "type": "boolean", "default": true }
+      }
+    }
+  }
+}

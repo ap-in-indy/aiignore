@@ -1,0 +1,185 @@
+{
+  "formatVersion": "0.1",
+  "specification": "0.1",
+  "release": "0.1.0-alpha.1",
+  "status": "experimental",
+  "uri": "https://ap-in-indy.github.io/aiignore/conformance/0.1/manifest.json",
+  "artifacts": [
+    {
+      "id": "specification",
+      "role": "specification",
+      "mediaType": "text/markdown; charset=utf-8",
+      "path": "spec/aiignore.md",
+      "uri": "https://ap-in-indy.github.io/aiignore/spec/0.1/aiignore.md",
+      "sha256": "34a916e0d2da4fa4791cb8ceadf896cbd1fb04c06d4183cacaf59768f2c32c9b"
+    },
+    {
+      "id": "specification-registries",
+      "role": "specification",
+      "mediaType": "text/markdown; charset=utf-8",
+      "path": "spec/registries.md",
+      "uri": "https://ap-in-indy.github.io/aiignore/spec/0.1/registries.md",
+      "sha256": "409ccd2985df24b25586c307429c901e7ae5e1ebcc12f2debb331223277f4299"
+    },
+    {
+      "id": "specification-errata",
+      "role": "specification",
+      "mediaType": "text/markdown; charset=utf-8",
+      "path": "spec/errata.md",
+      "uri": "https://ap-in-indy.github.io/aiignore/spec/0.1/errata.md",
+      "sha256": "ecaf793524341b1b52acdddcb6414c65ee7699ce1a01bce3ef03bdc04c98c36a"
+    },
+    {
+      "id": "schema-policy",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/aiignore.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/aiignore.schema.json",
+      "sha256": "6fef17d20d3c8cbc2be005c8669aa158fb14fba4164b1decf728a0ee8b460be7"
+    },
+    {
+      "id": "schema-decision",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/decision.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/decision.schema.json",
+      "sha256": "62404149291c78da10e0238fa06c2e8988e105199c45cd6cbd34fe7f9819dbd7"
+    },
+    {
+      "id": "schema-audit-event",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/audit-event.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/audit-event.schema.json",
+      "sha256": "7055628974790a02f7d15fb4e1a6135d1885ead4ba9ab2cc57f437aabee34908"
+    },
+    {
+      "id": "schema-readiness-report",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/readiness-report.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/readiness-report.schema.json",
+      "sha256": "130886db433cd006853d757353c621bf4d83463218ba8afcb2a1d91b8c6af428"
+    },
+    {
+      "id": "schema-implementation-conformance-report",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/implementation-conformance-report.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/implementation-conformance-report.schema.json",
+      "sha256": "20d207f1f3b7c469455c2d6c0807a5e3359c5e46650a445f39f6685b8d2130af"
+    },
+    {
+      "id": "schema-conformance-report",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/conformance-report.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-report.schema.json",
+      "sha256": "87ac529933ccacec7da50ccffd7380dd32a474af31033a7738cc413032f49d9b"
+    },
+    {
+      "id": "schema-conformance-signature-envelope",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/conformance-signature-envelope.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-signature-envelope.schema.json",
+      "sha256": "c2fb2ad1d9896c89789ab0121304c8aefca681f5acc72c6544c5df7a571926fa"
+    },
+    {
+      "id": "schema-decision-vectors",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/conformance-vectors.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-vectors.schema.json",
+      "sha256": "3c3a107e0876925e13234dbc5d75d4be34c3860deebfaece3915fd4330c6eaaa"
+    },
+    {
+      "id": "schema-parser-vectors",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/parser-vectors.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/parser-vectors.schema.json",
+      "sha256": "3a2d741400ae5b75cc639c6ad173b29ba35208d427128c435cfa3bc730b0ca40"
+    },
+    {
+      "id": "schema-harness-vectors",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/harness-vectors.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/harness-vectors.schema.json",
+      "sha256": "e206c99af3875a0525adf682b4a7a585a7f096023f0ef095a372f5a6a2b988ec"
+    },
+    {
+      "id": "schema-conformance-manifest",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/conformance-manifest.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-manifest.schema.json",
+      "sha256": "b7ea305122f9df84fb3a3fcf48ee3c4d6042ea8a34e6e80dde125c72f8255885"
+    },
+    {
+      "id": "schema-requirements-traceability",
+      "role": "schema",
+      "mediaType": "application/schema+json",
+      "path": "schema/requirements-traceability.schema.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/schema/0.1/requirements-traceability.schema.json",
+      "sha256": "9631af137a7f356286c51826ea6c4dbabc07d6562a4696675ca00abd3c382992"
+    },
+    {
+      "id": "requirements-traceability",
+      "role": "requirements",
+      "mediaType": "application/json",
+      "path": "conformance/requirements-v0.1.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/conformance/0.1/requirements.json",
+      "sha256": "fd6ada657b2cc10223623827eac2c07ecf3d5c461aad5240f835c7872ffa6182"
+    },
+    {
+      "id": "decision-core",
+      "role": "decision-vectors",
+      "mediaType": "application/json",
+      "path": "test/conformance/v0.1.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/decisions.json",
+      "sha256": "4da9021b6bf0895590a637628a9afc2b532d6903660a2fa0e86d50b6430dbbde"
+    },
+    {
+      "id": "decision-security",
+      "role": "decision-vectors",
+      "mediaType": "application/json",
+      "path": "test/conformance/security-v0.1.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/security.json",
+      "sha256": "31ac37f97056821cb1a1a92ba4fefa091dbf9e381525b439cc0c6607762650bb"
+    },
+    {
+      "id": "decision-options",
+      "role": "decision-vectors",
+      "mediaType": "application/json",
+      "path": "test/conformance/options-v0.1.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/options.json",
+      "sha256": "8566c76e20454147c3e92e9cc74dec214d5c89bf3800b03052dc9903149ab070"
+    },
+    {
+      "id": "decision-limits",
+      "role": "decision-vectors",
+      "mediaType": "application/json",
+      "path": "test/conformance/limits-v0.1.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/limits.json",
+      "sha256": "4ea590ac44bad1bab3ef4c2b648af9fc44ca9c9f7d52c11d380c7495611e887a"
+    },
+    {
+      "id": "parser-core",
+      "role": "parser-vectors",
+      "mediaType": "application/json",
+      "path": "test/parser-conformance/v0.1.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/parser.json",
+      "sha256": "d0cb46db240e0d7366bc551132b0564c7354c214972eb86ca54d1030f0ab1c42"
+    },
+    {
+      "id": "harness-codex-sandbox",
+      "role": "harness-vectors",
+      "mediaType": "application/json",
+      "path": "conformance/vectors/codex-sandbox-v0.1.json",
+      "uri": "https://ap-in-indy.github.io/aiignore/vectors/0.1/codex-sandbox.json",
+      "sha256": "ee3fb34c50b8dfbaaf7cf23cfbc5325213676cab03319fbde31a998956ccca0d"
+    }
+  ]
+}

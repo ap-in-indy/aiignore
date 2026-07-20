@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-signature-envelope.schema.json",
+  "title": "aiignore detached conformance signature envelope draft 0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "payloadType",
+    "payloadSha256",
+    "signatureAlgorithm",
+    "identity",
+    "publicKey",
+    "signatureBase64"
+  ],
+  "properties": {
+    "formatVersion": { "const": "0.1" },
+    "payloadType": {
+      "enum": [
+        "application/vnd.aiignore.conformance-report+json;version=0.1",
+        "application/vnd.aiignore.implementation-conformance-report+json;version=0.1"
+      ]
+    },
+    "payloadSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "signatureAlgorithm": { "const": "ed25519" },
+    "identity": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "issuer": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "publicKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "sha256", "value"],
+      "properties": {
+        "format": { "const": "spki-pem" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "value": {
+          "type": "string",
+          "pattern": "^-----BEGIN PUBLIC KEY-----\\n(?:[A-Za-z0-9+/]{1,64}={0,2}\\n)+-----END PUBLIC KEY-----\\n$",
+          "maxLength": 2048
+        }
+      }
+    },
+    "signatureBase64": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{86}==$",
+      "maxLength": 88
+    }
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "name": "aiignore",
+  "version": "0.1.0-alpha.1",
+  "description": "Reference implementation and conformance suite for the experimental aiignore policy specification",
+  "author": {
+    "name": "Alex",
+    "email": "alex@alexdoes.it",
+    "url": "https://alexdoes.it"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schema": "./schema/aiignore.schema.json",
+    "./decision-schema": "./schema/decision.schema.json",
+    "./audit-event-schema": "./schema/audit-event.schema.json",
+    "./readiness-report-schema": "./schema/readiness-report.schema.json",
+    "./implementation-conformance-report-schema": "./schema/implementation-conformance-report.schema.json",
+    "./conformance-schema": "./schema/conformance-report.schema.json",
+    "./conformance-signature-envelope-schema": "./schema/conformance-signature-envelope.schema.json",
+    "./conformance-vectors-schema": "./schema/conformance-vectors.schema.json",
+    "./parser-vectors-schema": "./schema/parser-vectors.schema.json",
+    "./harness-vectors-schema": "./schema/harness-vectors.schema.json",
+    "./conformance-manifest-schema": "./schema/conformance-manifest.schema.json",
+    "./requirements-traceability-schema": "./schema/requirements-traceability.schema.json",
+    "./conformance-manifest": "./conformance/manifest-v0.1.json",
+    "./requirements-traceability": "./conformance/requirements-v0.1.json",
+    "./vectors/decisions": "./test/conformance/v0.1.json",
+    "./vectors/security": "./test/conformance/security-v0.1.json",
+    "./vectors/options": "./test/conformance/options-v0.1.json",
+    "./vectors/limits": "./test/conformance/limits-v0.1.json",
+    "./vectors/parser": "./test/parser-conformance/v0.1.json",
+    "./vectors/codex-sandbox": "./conformance/vectors/codex-sandbox-v0.1.json",
+    "./profiles/recommended": "./profiles/recommended.aiignore.yaml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ap-in-indy/aiignore.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ap-in-indy/aiignore/issues"
+  },
+  "homepage": "https://ap-in-indy.github.io/aiignore/",
+  "keywords": [
+    "ai",
+    "agents",
+    "security",
+    "policy",
+    "ignore",
+    "sandbox"
+  ],
+  "bin": {
+    "aiignore": "dist/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "schema",
+    "spec",
+    "docs",
+    "rfcs",
+    "examples",
+    "profiles",
+    "test/conformance",
+    "test/parser-conformance",
+    "test/fuzz",
+    "conformance/manifest-v0.1.json",
+    "conformance/requirements-v0.1.json",
+    "conformance/results",
+    "conformance/vectors",
+    "integrations/codex",
+    "integrations/gemini",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "SUPPORT.md",
+    "MAINTAINERS.md",
+    "DCO",
+    "CITATION.cff",
+    "security-insights.yml",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "postbuild": "node scripts/prepare-dist.mjs",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "fuzz:smoke": "node test/fuzz/fuzz.mjs --iterations 2000",
+    "fuzz:extended": "node test/fuzz/fuzz.mjs --iterations 25000",
+    "lint": "eslint .",
+    "test:testbed": "node testbed/run.mjs && node testbed/gemini/run.mjs && node testbed/hooks/run.mjs",
+    "plugin:validate": "node scripts/validate-plugin.mjs && node scripts/validate-gemini-extension.mjs",
+    "workflow:validate": "node scripts/validate-workflows.mjs",
+    "license:validate": "node scripts/validate-licenses.mjs",
+    "security-metadata:validate": "node scripts/validate-security-metadata.mjs",
+    "project-policy:validate": "node scripts/validate-project-policy.mjs",
+    "hosting-policy:validate": "node scripts/audit-github-hosting.mjs --validate-policy",
+    "hosting:audit": "node scripts/audit-github-hosting.mjs",
+    "security:secrets": "bash scripts/scan-secrets.sh",
+    "manifest:validate": "node scripts/validate-conformance-manifest.mjs",
+    "requirements:validate": "node scripts/validate-requirements-traceability.mjs",
+    "site:build": "node scripts/build-site.mjs",
+    "publication:verify": "node scripts/verify-publication.mjs",
+    "package:validate": "node scripts/validate-package.mjs",
+    "artifact:validate": "node scripts/validate-artifact.mjs",
+    "verify": "npm run check && npm run lint && npm run coverage && npm run build && npm run fuzz:smoke && node dist/cli.js validate examples/complete.aiignore.yaml && node dist/cli.js conformance test/conformance/v0.1.json && node dist/cli.js conformance test/conformance/security-v0.1.json && node dist/cli.js conformance test/conformance/options-v0.1.json && node dist/cli.js conformance test/conformance/limits-v0.1.json && node dist/cli.js parser-conformance test/parser-conformance/v0.1.json && npm run test:testbed && npm run plugin:validate && npm run workflow:validate && npm run license:validate && npm run security-metadata:validate && npm run project-policy:validate && npm run hosting-policy:validate && npm run requirements:validate && npm run manifest:validate && npm run site:build && npm run package:validate && npm run artifact:validate"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "minimatch": "^10.2.5",
+    "re2js": "^2.8.6",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^9.39.2",
+    "globals": "^17.7.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.53.1",
+    "vitest": "^4.1.10"
+  }
+}

@@ -1,0 +1,32 @@
+name: DCO
+
+on:
+  # This trusted-base event is safe only because the job never checks out or
+  # executes the pull-request head and has read-only repository/PR access.
+  pull_request_target:
+
+concurrency:
+  group: dco-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  signoff:
+    name: DCO sign-off
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.base.sha }}
+      - name: Require a matching sign-off on every pull-request commit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: node scripts/validate-dco.mjs --github-repository "$REPOSITORY" --pull-request "$PR_NUMBER"

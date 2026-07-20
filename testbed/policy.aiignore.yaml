@@ -1,0 +1,25 @@
+aiignore: "0.1"
+defaults:
+  network: deny
+rules:
+  files:
+    - id: canary-files
+      effect: deny
+      paths: ["private/**", "**/.env"]
+      except: ["private/public-fixture.txt"]
+  environment:
+    - id: canary-env
+      effect: drop
+      names: ["AIIGNORE_CANARY_*", "*_TOKEN"]
+      except: ["AIIGNORE_CANARY_PUBLIC"]
+  network:
+    - id: local-docs
+      effect: allow
+      urls: ["https://docs.example.com/**"]
+  strings:
+    - id: canary-string
+      effect: redact
+      scopes: [tool_output, log, network_request]
+      patterns:
+        - {type: literal, value: "AIIGNORE-CANARY-STRING"}
+      replacement: "[REDACTED:canary-string]"

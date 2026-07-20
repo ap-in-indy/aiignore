@@ -1,0 +1,136 @@
+{
+  "formatVersion": "0.1",
+  "specification": "0.1",
+  "status": "experimental",
+  "evidenceBaseUri": "https://github.com/ap-in-indy/aiignore/blob/v0.1.0-alpha.1/",
+  "sections": [
+    {
+      "section": 1,
+      "title": "Scope",
+      "normativeKeywordCount": 0,
+      "assurance": "informational",
+      "evidence": ["docs/concept.md", "docs/architecture.md"],
+      "limitations": ["Scope statements define the problem and do not establish deployed enforcement."]
+    },
+    {
+      "section": 2,
+      "title": "File identity, compatibility, and serialization",
+      "normativeKeywordCount": 17,
+      "assurance": "implemented",
+      "evidence": ["schema/aiignore.schema.json", "test/parser-conformance/v0.1.json", "test/parser.test.ts", "test/policy-schema-contract.test.ts"],
+      "limitations": []
+    },
+    {
+      "section": 3,
+      "title": "Root object",
+      "normativeKeywordCount": 1,
+      "assurance": "implemented",
+      "evidence": ["schema/aiignore.schema.json", "test/parser-conformance/v0.1.json", "test/parser.test.ts"],
+      "limitations": []
+    },
+    {
+      "section": 4,
+      "title": "Common rule evaluation",
+      "normativeKeywordCount": 20,
+      "assurance": "implemented",
+      "evidence": ["schema/decision.schema.json", "test/conformance/v0.1.json", "test/conformance/options-v0.1.json", "test/coverage-contract.test.ts"],
+      "limitations": []
+    },
+    {
+      "section": 5,
+      "title": "File rules",
+      "normativeKeywordCount": 13,
+      "assurance": "implemented-with-external-limits",
+      "evidence": ["test/conformance/security-v0.1.json", "test/engine-file.test.ts", "test/patterns.test.ts", "conformance/vectors/codex-sandbox-v0.1.json"],
+      "limitations": ["Symlink, alias, archive, cache, VCS-object, and subprocess mediation require platform-specific harness evidence."]
+    },
+    {
+      "section": 6,
+      "title": "Environment rules",
+      "normativeKeywordCount": 5,
+      "assurance": "implemented-with-external-limits",
+      "evidence": ["test/conformance/security-v0.1.json", "test/engine-environment.test.ts", "test/integration-hooks.test.ts"],
+      "limitations": ["Native Windows case behavior and complete child-process inheritance require live platform evidence."]
+    },
+    {
+      "section": 7,
+      "title": "Network rules",
+      "normativeKeywordCount": 18,
+      "assurance": "implemented-with-external-limits",
+      "evidence": ["test/conformance/security-v0.1.json", "test/conformance/limits-v0.1.json", "test/engine-network.test.ts", "test/patterns.test.ts"],
+      "limitations": ["Redirect, DNS-rebinding, private-address, browser, MCP, and subprocess egress enforcement require a real proxy or sandbox and live harness evidence."]
+    },
+    {
+      "section": 8,
+      "title": "String rules",
+      "normativeKeywordCount": 19,
+      "assurance": "implemented-with-external-limits",
+      "evidence": ["test/conformance/options-v0.1.json", "test/conformance/limits-v0.1.json", "test/engine-string.test.ts", "test/patterns.test.ts"],
+      "limitations": ["Complete ingress and egress coverage depends on every harness data path being mediated."]
+    },
+    {
+      "section": 9,
+      "title": "Policy discovery and integrity",
+      "normativeKeywordCount": 15,
+      "assurance": "implemented-with-external-limits",
+      "evidence": ["test/cli.test.ts", "test/integration-hooks.test.ts", "docs/enterprise-deployment.md"],
+      "limitations": ["Administrator-controlled distribution, read-only mounting, launcher integrity, and monotonic policy composition remain deployment responsibilities."]
+    },
+    {
+      "section": 10,
+      "title": "Failure behavior",
+      "normativeKeywordCount": 7,
+      "assurance": "implemented",
+      "evidence": ["test/conformance/limits-v0.1.json", "test/parser-conformance/v0.1.json", "test/cli.test.ts", "test/integration-hooks.test.ts"],
+      "limitations": []
+    },
+    {
+      "section": 11,
+      "title": "Conformance",
+      "normativeKeywordCount": 21,
+      "assurance": "implemented-with-external-limits",
+      "evidence": ["schema/implementation-conformance-report.schema.json", "schema/conformance-report.schema.json", "schema/conformance-signature-envelope.schema.json", "test/implementation-conformance.test.ts", "test/report-signature.test.ts"],
+      "limitations": ["Reference implementation evidence is not independent implementation evidence, and harness reports establish only their enumerated paths and platforms."]
+    },
+    {
+      "section": 12,
+      "title": "Security considerations",
+      "normativeKeywordCount": 0,
+      "assurance": "process",
+      "evidence": ["docs/architecture.md", "docs/research/incidents.md", "docs/research/adversarial-test-results.md", "SECURITY.md"],
+      "limitations": ["No independent security assessment has been completed."]
+    },
+    {
+      "section": 13,
+      "title": "Privacy and data minimization",
+      "normativeKeywordCount": 7,
+      "assurance": "implemented-with-external-limits",
+      "evidence": ["schema/audit-event.schema.json", "schema/readiness-report.schema.json", "test/readiness.test.ts", "test/protocol-schema.test.ts"],
+      "limitations": ["Protected audit-sink operation and downstream retention controls require deployment evidence."]
+    },
+    {
+      "section": 14,
+      "title": "Internationalization and text processing",
+      "normativeKeywordCount": 6,
+      "assurance": "implemented-with-external-limits",
+      "evidence": ["test/parser-conformance/v0.1.json", "test/conformance/security-v0.1.json", "test/patterns.test.ts"],
+      "limitations": ["Filesystem normalization and case behavior outside tested runtimes require platform-specific evidence."]
+    },
+    {
+      "section": 15,
+      "title": "Versioning and canonical artifacts",
+      "normativeKeywordCount": 2,
+      "assurance": "process",
+      "evidence": ["conformance/manifest-v0.1.json", "spec/registries.md", "spec/errata.md", "docs/versioning.md", "test/conformance-manifest.test.ts"],
+      "limitations": ["Canonical public URLs and immutable release behavior require a completed public release."]
+    },
+    {
+      "section": 16,
+      "title": "Normative references",
+      "normativeKeywordCount": 0,
+      "assurance": "informational",
+      "evidence": ["spec/aiignore.md", "scripts/validate-project-policy.mjs"],
+      "limitations": ["External specifications remain authoritative for their referenced requirements."]
+    }
+  ]
+}
