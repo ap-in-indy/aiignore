@@ -151,7 +151,7 @@ describe('workflow policy mutation resistance', () => {
     "test \"$(jq -r '.verification.reason' <<<\"$TAG_OBJECT\")\" = \"valid\"",
     "test \"$(jq -r '.tagger.name' <<<\"$TAG_OBJECT\")\" = \"Alex\"",
     "test \"$(jq -r '.tagger.email' <<<\"$TAG_OBJECT\")\" = \"alex@alexdoes.it\"",
-    "test \"$(jq -r '.message' <<<\"$TAG_OBJECT\")\" = \"aiignore policy ${RELEASE_TAG#v}\"",
+    "test \"$(jq -r '.message | split(\"\\n-----BEGIN SSH SIGNATURE-----\\n\")[0]' <<<\"$TAG_OBJECT\")\" =",
     "test \"$(jq -r '.can_admins_bypass' <<<\"$ENVIRONMENT\")\" = \"false\"",
     `'[.protection_rules[] | select(.type == "required_reviewers")] | length == 0'`,
     'node scripts/normalize-sbom.mjs "$RAW_SBOM" "$INPUT_DIRECTORY/$SBOM"',

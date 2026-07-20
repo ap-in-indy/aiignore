@@ -53,7 +53,8 @@ jobs:
           test "$(jq -r '.verification.reason' <<<"$TAG_OBJECT")" = "valid"
           test "$(jq -r '.tagger.name' <<<"$TAG_OBJECT")" = "Alex"
           test "$(jq -r '.tagger.email' <<<"$TAG_OBJECT")" = "alex@alexdoes.it"
-          test "$(jq -r '.message' <<<"$TAG_OBJECT")" = "aiignore policy ${RELEASE_TAG#v}"
+          test "$(jq -r '.message | split("\n-----BEGIN SSH SIGNATURE-----\n")[0]' <<<"$TAG_OBJECT")" = \
+            "aiignore policy ${RELEASE_TAG#v}"
           test "$(jq -r '.object.sha' <<<"$TAG_OBJECT")" = "$(git rev-parse HEAD)"
           git fetch origin main --no-tags
           git merge-base --is-ancestor HEAD origin/main

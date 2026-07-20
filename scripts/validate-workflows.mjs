@@ -244,7 +244,7 @@ for (const filename of readdirSync(directory).filter((name) => /\.ya?ml$/u.test(
           "test \"$(jq -r '.verification.reason' <<<\"$TAG_OBJECT\")\" = \"valid\"",
           "test \"$(jq -r '.tagger.name' <<<\"$TAG_OBJECT\")\" = \"Alex\"",
           "test \"$(jq -r '.tagger.email' <<<\"$TAG_OBJECT\")\" = \"alex@alexdoes.it\"",
-          "test \"$(jq -r '.message' <<<\"$TAG_OBJECT\")\" = \"aiignore policy ${RELEASE_TAG#v}\"",
+          "test \"$(jq -r '.message | split(\"\\n-----BEGIN SSH SIGNATURE-----\\n\")[0]' <<<\"$TAG_OBJECT\")\" =",
           "test \"$(jq -r '.object.sha' <<<\"$TAG_OBJECT\")\" = \"$(git rev-parse HEAD)\"",
           'test "v$(node -p "require(\'./package.json\').version")" = "$RELEASE_TAG"',
           'test -f "docs/release-notes/${RELEASE_TAG#v}.md"'
