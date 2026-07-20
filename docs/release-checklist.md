@@ -53,9 +53,9 @@ of the gate, not authorization for public visibility or publication.
       `.github/hosting-policy.json` desired state.
 - [ ] The initial tag is signed and points to the reviewed commit.
 
-## 3. Publish `aiignore`
+## 3. Publish `@apinindy/aiignore`
 
-- [ ] The unscoped package name remains available and the maintainer account
+- [ ] The scoped package name remains available and the maintainer account
       is authorized to publish it.
 - [ ] A tag-triggered release workflow uses npm trusted publishing/provenance;
       no long-lived npm token is stored when OIDC is available.

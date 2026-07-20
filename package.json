@@ -1,5 +1,5 @@
 {
-  "name": "aiignore",
+  "name": "@apinindy/aiignore",
   "version": "0.1.0-alpha.1",
   "description": "Reference implementation and conformance suite for the experimental aiignore policy specification",
   "author": {

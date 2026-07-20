@@ -43,7 +43,7 @@ Install the exact prerelease intentionally rather than accepting future alpha
 changes implicitly:
 
 ```sh
-npm install --ignore-scripts --save-dev aiignore@0.1.0-alpha.1
+npm install --ignore-scripts --save-dev @apinindy/aiignore@0.1.0-alpha.1
 npx aiignore init
 npx aiignore validate
 npx aiignore doctor

@@ -175,12 +175,12 @@ integrity. New and draft releases may never skip the Pages comparison.
 Verify the public result independently:
 
 ```sh
-npm view aiignore@0.1.0-alpha.1 version dist.integrity
-npm view aiignore dist-tags --json
+npm view @apinindy/aiignore@0.1.0-alpha.1 version dist.integrity
+npm view @apinindy/aiignore dist-tags --json
 gh release view v0.1.0-alpha.1 --json isDraft,isPrerelease,assets
 gh release download v0.1.0-alpha.1 --dir release-verification
 gh attestation verify \
-  release-verification/aiignore-0.1.0-alpha.1.tgz \
+  release-verification/apinindy-aiignore-0.1.0-alpha.1.tgz \
   --repo ap-in-indy/aiignore
 npm run publication:verify
 ```

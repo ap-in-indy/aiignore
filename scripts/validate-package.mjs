@@ -17,7 +17,7 @@ if (result.status !== 0) {
 }
 
 const [pack] = JSON.parse(result.stdout);
-if (!pack || pack.name !== 'aiignore') throw new Error('unexpected package identity');
+if (!pack || pack.name !== '@apinindy/aiignore') throw new Error('unexpected package identity');
 if (pack.unpackedSize > 1024 * 1024) throw new Error('package exceeds the 1 MiB unpacked limit');
 if (pack.entryCount > 160) throw new Error('package contains unexpectedly many files');
 

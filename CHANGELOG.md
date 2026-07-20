@@ -25,7 +25,7 @@ specification compatibility is identified separately by the `aiignore` field.
   beds.
 - Canonical specification site, enterprise deployment profile, release
   workflow, SBOM/checksum/attestation assets, and package payload validation.
-- Unscoped `aiignore` npm package identity exposing the CLI, TypeScript API,
+- Scoped `@apinindy/aiignore` npm package identity exposing the CLI, TypeScript API,
   schemas, profiles, and portable conformance artifacts.
 - Executable schema/runtime/vector coverage contract and expected-error
   decision vectors.

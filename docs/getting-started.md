@@ -18,7 +18,7 @@ node dist/cli.js init
 After the package is published, pin the exact prerelease:
 
 ```sh
-npm install --ignore-scripts --save-dev aiignore@0.1.0-alpha.1
+npm install --ignore-scripts --save-dev @apinindy/aiignore@0.1.0-alpha.1
 npx aiignore init
 ```
 

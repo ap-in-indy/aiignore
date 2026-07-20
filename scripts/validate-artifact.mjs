@@ -158,7 +158,7 @@ import {
   runParserConformanceFile,
   signConformanceReport,
   verifyConformanceReport
-} from 'aiignore';
+} from '@apinindy/aiignore';
 
 assert.equal(PACKAGE_VERSION, ${JSON.stringify(readPackageVersion())});
 assert.equal(SPEC_VERSION, '0.1');
@@ -181,24 +181,24 @@ assert.equal(assessReadiness(loaded).deploymentEnforcement, 'not-established');
 assert.equal(compileCodexPermissionProfile(loaded).exact, false);
 
 const jsonAssets = [
-  ['aiignore/schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/aiignore.schema.json'],
-  ['aiignore/decision-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/decision.schema.json'],
-  ['aiignore/audit-event-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/audit-event.schema.json'],
-  ['aiignore/readiness-report-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/readiness-report.schema.json'],
-  ['aiignore/implementation-conformance-report-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/implementation-conformance-report.schema.json'],
-  ['aiignore/conformance-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-report.schema.json'],
-  ['aiignore/conformance-signature-envelope-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-signature-envelope.schema.json'],
-  ['aiignore/conformance-vectors-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-vectors.schema.json'],
-  ['aiignore/parser-vectors-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/parser-vectors.schema.json'],
-  ['aiignore/harness-vectors-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/harness-vectors.schema.json'],
-  ['aiignore/conformance-manifest-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-manifest.schema.json'],
-  ['aiignore/requirements-traceability-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/requirements-traceability.schema.json']
+  ['@apinindy/aiignore/schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/aiignore.schema.json'],
+  ['@apinindy/aiignore/decision-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/decision.schema.json'],
+  ['@apinindy/aiignore/audit-event-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/audit-event.schema.json'],
+  ['@apinindy/aiignore/readiness-report-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/readiness-report.schema.json'],
+  ['@apinindy/aiignore/implementation-conformance-report-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/implementation-conformance-report.schema.json'],
+  ['@apinindy/aiignore/conformance-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-report.schema.json'],
+  ['@apinindy/aiignore/conformance-signature-envelope-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-signature-envelope.schema.json'],
+  ['@apinindy/aiignore/conformance-vectors-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-vectors.schema.json'],
+  ['@apinindy/aiignore/parser-vectors-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/parser-vectors.schema.json'],
+  ['@apinindy/aiignore/harness-vectors-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/harness-vectors.schema.json'],
+  ['@apinindy/aiignore/conformance-manifest-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/conformance-manifest.schema.json'],
+  ['@apinindy/aiignore/requirements-traceability-schema', 'https://ap-in-indy.github.io/aiignore/schema/0.1/requirements-traceability.schema.json']
 ];
 for (const [specifier, expectedId] of jsonAssets) {
   const value = JSON.parse(readFileSync(fileURLToPath(import.meta.resolve(specifier)), 'utf8'));
   assert.equal(value.$id, expectedId);
 }
-const manifestPath = fileURLToPath(import.meta.resolve('aiignore/conformance-manifest'));
+const manifestPath = fileURLToPath(import.meta.resolve('@apinindy/aiignore/conformance-manifest'));
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 assert.equal(manifest.uri, 'https://ap-in-indy.github.io/aiignore/conformance/0.1/manifest.json');
 assert.equal(manifest.artifacts.length, 22);
@@ -207,15 +207,15 @@ for (const artifact of manifest.artifacts) {
   const bytes = readFileSync(path.join(packageRoot, artifact.path));
   assert.equal(createHash('sha256').update(bytes).digest('hex'), artifact.sha256);
 }
-const requirements = JSON.parse(readFileSync(fileURLToPath(import.meta.resolve('aiignore/requirements-traceability')), 'utf8'));
+const requirements = JSON.parse(readFileSync(fileURLToPath(import.meta.resolve('@apinindy/aiignore/requirements-traceability')), 'utf8'));
 assert.equal(requirements.sections.length, 16);
 const decisionVectorSpecifiers = [
-  'aiignore/vectors/decisions',
-  'aiignore/vectors/security',
-  'aiignore/vectors/options',
-  'aiignore/vectors/limits'
+  '@apinindy/aiignore/vectors/decisions',
+  '@apinindy/aiignore/vectors/security',
+  '@apinindy/aiignore/vectors/options',
+  '@apinindy/aiignore/vectors/limits'
 ];
-const parserVectors = fileURLToPath(import.meta.resolve('aiignore/vectors/parser'));
+const parserVectors = fileURLToPath(import.meta.resolve('@apinindy/aiignore/vectors/parser'));
 for (const specifier of decisionVectorSpecifiers) {
   assert.equal(runConformanceFile(fileURLToPath(import.meta.resolve(specifier))).conformant, true);
 }
@@ -245,11 +245,11 @@ assert.deepEqual(
   }
 );
 const harnessVectors = JSON.parse(
-  readFileSync(fileURLToPath(import.meta.resolve('aiignore/vectors/codex-sandbox')), 'utf8')
+  readFileSync(fileURLToPath(import.meta.resolve('@apinindy/aiignore/vectors/codex-sandbox')), 'utf8')
 );
 assert.equal(harnessVectors.specification, SPEC_VERSION);
 assert.equal(harnessVectors.cases.length, 11);
-const recommended = readFileSync(fileURLToPath(import.meta.resolve('aiignore/profiles/recommended')));
+const recommended = readFileSync(fileURLToPath(import.meta.resolve('@apinindy/aiignore/profiles/recommended')));
 assert.equal(parsePolicy(recommended).document.metadata?.name, 'recommended-secrets-baseline');
 `,
     'utf8'
@@ -269,7 +269,7 @@ function writeConsumerTypeCheck(consumer) {
   type PolicyDocument,
   type SignConformanceReportOptions,
   type VerifyConformanceReportOptions
-} from 'aiignore';
+} from '@apinindy/aiignore';
 
 const loaded: LoadedPolicy = parsePolicy(new Uint8Array([0x61]));
 const document: PolicyDocument = loaded.document;

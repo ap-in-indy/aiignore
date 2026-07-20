@@ -4,11 +4,11 @@
 
 ### Reserve and configure the npm package
 
-**What:** Confirm control of `aiignore`, bootstrap the package if npm requires an initial manual publication, and configure the repository release workflow as its trusted publisher.
+**What:** Confirm control of `@apinindy/aiignore`, bootstrap the package if npm requires an initial manual publication, and configure the repository release workflow as its trusted publisher.
 
 **Why:** Package-name availability is not ownership, and npm provenance is only produced for a public package built from a matching public repository.
 
-**Context:** The unscoped `aiignore` name currently returns 404, while similarly named packages and the `@aiignore` scope belong to other projects; npm may still reject a confusingly similar name during the first publication. The workflow requires npm 11.5.1+, OIDC trusted publishing, a protected `release` environment, and no long-lived publication token after bootstrap.
+**Context:** npm rejected the unscoped `aiignore` name as confusingly similar to `ignore`, so the approved release target is `@apinindy/aiignore`. The workflow requires npm 11.5.1+, OIDC trusted publishing, a protected `release` environment, and no long-lived publication token after bootstrap.
 
 **Effort:** S
 **Priority:** P0

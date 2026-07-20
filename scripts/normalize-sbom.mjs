@@ -29,7 +29,8 @@ export function normalizeSbom(document, packageIdentity) {
       throw new Error('package identity or SBOM root component is invalid');
     }
     const expectedReference = `${packageIdentity.name}@${packageIdentity.version}`;
-    const expectedPurl = `pkg:npm/${expectedReference}`;
+    const purlName = packageIdentity.name.replace(/^@/u, '%40');
+    const expectedPurl = `pkg:npm/${purlName}@${packageIdentity.version}`;
     if (
       normalized.metadata.component['bom-ref'] !== expectedReference ||
       normalized.metadata.component.version !== packageIdentity.version ||
