@@ -9,6 +9,12 @@ const SHA256_PATTERN = /^[a-f0-9]{40}$/u;
 const REPOSITORY_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/u;
 const PULL_REQUEST_PATTERN = /^[1-9][0-9]*$/u;
 const SIGNOFF_PATTERN = /^Signed-off-by:\s*([^<>\r\n]+?)\s*<([^<>\s\r\n]+)>\s*$/gmu;
+const DEPENDABOT = Object.freeze({
+  id: 49699333,
+  login: 'dependabot[bot]',
+  name: 'dependabot[bot]',
+  email: '49699333+dependabot[bot]@users.noreply.github.com'
+});
 
 export function validateDcoRange(base, head, options = {}) {
   if (!SHA256_PATTERN.test(base) || !SHA256_PATTERN.test(head)) {
@@ -64,7 +70,7 @@ export function validateDcoCommits(commits) {
       const email = match[2]?.trim().toLowerCase();
       return name === expectedName && email === expectedEmail;
     });
-    if (!valid) {
+    if (!valid && !isVerifiedDependabotCommit(commit)) {
       failures.push(
         `${commit.sha.slice(0, 12)} ${expectedName} <${commit.authorEmail.trim()}>`
       );
@@ -113,7 +119,18 @@ export async function validateGithubPullRequest(repository, pullRequest, options
         sha: entry?.sha,
         authorName: entry?.commit?.author?.name,
         authorEmail: entry?.commit?.author?.email,
-        message: entry?.commit?.message
+        message: entry?.commit?.message,
+        pullAuthorLogin: pull?.user?.login,
+        pullAuthorType: pull?.user?.type,
+        githubAuthorId: entry?.author?.id,
+        githubAuthorLogin: entry?.author?.login,
+        githubAuthorType: entry?.author?.type,
+        committerName: entry?.commit?.committer?.name,
+        committerEmail: entry?.commit?.committer?.email,
+        githubCommitterLogin: entry?.committer?.login,
+        githubCommitterType: entry?.committer?.type,
+        verificationVerified: entry?.commit?.verification?.verified,
+        verificationReason: entry?.commit?.verification?.reason
       });
       if (commits.length > MAX_COMMITS) {
         throw new Error(`DCO range must contain between 1 and ${MAX_COMMITS} commits`);
@@ -127,6 +144,24 @@ export async function validateGithubPullRequest(repository, pullRequest, options
     );
   }
   return validateDcoCommits(commits);
+}
+
+function isVerifiedDependabotCommit(commit) {
+  return (
+    commit.pullAuthorLogin === DEPENDABOT.login &&
+    commit.pullAuthorType === 'Bot' &&
+    commit.githubAuthorId === DEPENDABOT.id &&
+    commit.githubAuthorLogin === DEPENDABOT.login &&
+    commit.githubAuthorType === 'Bot' &&
+    commit.authorName.trim() === DEPENDABOT.name &&
+    commit.authorEmail.trim().toLowerCase() === DEPENDABOT.email &&
+    commit.committerName === 'GitHub' &&
+    commit.committerEmail === 'noreply@github.com' &&
+    commit.githubCommitterLogin === 'web-flow' &&
+    commit.githubCommitterType === 'User' &&
+    commit.verificationVerified === true &&
+    commit.verificationReason === 'valid'
+  );
 }
 
 async function fetchGithubJson(url, fetchImpl, token) {
@@ -196,7 +231,7 @@ async function main() {
       'usage: validate-dco.mjs BASE_SHA HEAD_SHA | --github-repository OWNER/NAME --pull-request NUMBER'
     );
   }
-  process.stdout.write(`ok - ${result.commits} commits contain matching DCO sign-offs\n`);
+  process.stdout.write(`ok - ${result.commits} commits satisfy DCO policy\n`);
 }
 
 if (

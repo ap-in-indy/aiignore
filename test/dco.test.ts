@@ -110,6 +110,48 @@ describe('DCO range validation', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 
+  it('accepts only GitHub-verified commits from the fixed Dependabot identity', async () => {
+    const fetchImpl = githubPullFixture({
+      pull: { commits: 1, user: { login: 'dependabot[bot]', type: 'Bot' } },
+      commit: verifiedDependabotCommit()
+    });
+    await expect(
+      validateGithubPullRequest('example/project', '17', {
+        fetchImpl,
+        token: 'read-token'
+      })
+    ).resolves.toEqual({ commits: 1 });
+  });
+
+  it('rejects unsigned Dependabot-shaped metadata without a valid GitHub signature', async () => {
+    const forged = verifiedDependabotCommit();
+    forged.commit.verification.verified = false;
+    forged.commit.verification.reason = 'unsigned';
+    const fetchImpl = githubPullFixture({
+      pull: { commits: 1, user: { login: 'dependabot[bot]', type: 'Bot' } },
+      commit: forged
+    });
+    await expect(
+      validateGithubPullRequest('example/project', '17', {
+        fetchImpl,
+        token: 'read-token'
+      })
+    ).rejects.toThrow('author-matching DCO sign-off');
+  });
+
+  it('rejects a verified Dependabot commit submitted through a non-Dependabot PR', async () => {
+    const fetchImpl = githubPullFixture({
+      pull: { commits: 1, user: { login: 'contributor', type: 'User' } },
+      commit: verifiedDependabotCommit()
+    });
+    await expect(
+      validateGithubPullRequest('example/project', '17', {
+        fetchImpl,
+        token: 'read-token'
+      })
+    ).rejects.toThrow('author-matching DCO sign-off');
+  });
+
   it('fails closed when GitHub cannot return the complete PR commit set', async () => {
     const fetchImpl = vi.fn(() =>
       Promise.resolve(new Response(JSON.stringify({ commits: 251 })))
@@ -148,4 +190,34 @@ function fixtureGit(commits: Array<{ sha: string; metadata: string }>) {
     }
     throw new Error(`unexpected git invocation: ${args.join(' ')}`);
   };
+}
+
+function verifiedDependabotCommit() {
+  return {
+    sha: first,
+    author: { id: 49699333, login: 'dependabot[bot]', type: 'Bot' },
+    committer: { login: 'web-flow', type: 'User' },
+    commit: {
+      author: {
+        name: 'dependabot[bot]',
+        email: '49699333+dependabot[bot]@users.noreply.github.com'
+      },
+      committer: { name: 'GitHub', email: 'noreply@github.com' },
+      message: 'build(deps): update fixture\n',
+      verification: { verified: true, reason: 'valid' }
+    }
+  };
+}
+
+function githubPullFixture({ pull, commit }: { pull: object; commit: object }) {
+  return vi.fn((input: string | URL | Request) => {
+    const url = input instanceof Request ? input.url : input instanceof URL ? input.href : input;
+    if (url === 'https://api.github.com/repos/example/project/pulls/17') {
+      return Promise.resolve(new Response(JSON.stringify(pull)));
+    }
+    expect(url).toBe(
+      'https://api.github.com/repos/example/project/pulls/17/commits?per_page=100&page=1'
+    );
+    return Promise.resolve(new Response(JSON.stringify([commit])));
+  });
 }

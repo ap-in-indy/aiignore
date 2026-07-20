@@ -34,3 +34,8 @@ The pull-request DCO check validates every commit; adding one sign-off in a
 later commit does not repair earlier unsigned commits. By signing off,
 contributors make the certification in the repository's verbatim [`DCO`](DCO)
 under the MIT contribution license.
+
+GitHub-verified commits created by the fixed `dependabot[bot]` application
+identity are the sole automated exception. The check verifies the pull-request
+actor, GitHub author identity, web-flow committer, and valid GitHub signature;
+human-authored commits are never exempted from the matching sign-off rule.
