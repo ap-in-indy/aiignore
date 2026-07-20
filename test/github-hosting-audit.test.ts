@@ -16,6 +16,10 @@ describe('public GitHub hosting policy audit', () => {
       .find(({ name }) => name === 'Protect main')!
       .rules.find(({ type }) => type === 'required_status_checks')!;
     statusChecks.parameters!.required_status_checks!.reverse();
+    const pullRequest = snapshot.rulesets
+      .find(({ name }) => name === 'Protect main')!
+      .rules.find(({ type }) => type === 'pull_request')!;
+    pullRequest.parameters!.required_reviewers = [];
     expect(auditGithubHosting({ policyPath, snapshotPath: writeSnapshot(snapshot) })).toEqual({
       valid: true,
       repository: 'ap-in-indy/aiignore',
@@ -218,6 +222,7 @@ interface Rule {
   type: string;
   parameters?: {
     required_approving_review_count?: number;
+    required_reviewers?: unknown[];
     required_status_checks?: Array<{ context: string; integration_id?: number }>;
   };
 }

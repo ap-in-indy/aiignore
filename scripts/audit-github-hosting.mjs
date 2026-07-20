@@ -63,6 +63,11 @@ function captureHostingSnapshot(repository) {
   const immutableReleases = ghOptional(repository, 'repos/{repo}/immutable-releases', {
     enabled: false
   });
+  const codeScanningAnalyses = ghOptional(
+    repository,
+    'repos/{repo}/code-scanning/analyses?per_page=1',
+    []
+  );
   const requiredReviewers = (environment.protection_rules ?? []).find(
     ({ type }) => type === 'required_reviewers'
   );
@@ -86,9 +91,7 @@ function captureHostingSnapshot(repository) {
       secretScanning: security.secret_scanning?.status === 'enabled',
       secretScanningPushProtection:
         security.secret_scanning_push_protection?.status === 'enabled',
-      codeScanning:
-        security.code_security?.status === 'enabled' ||
-        security.advanced_security?.status === 'enabled',
+      codeScanning: isCodeScanningEnabled(security, codeScanningAnalyses),
       dependabotSecurityUpdates: security.dependabot_security_updates?.status === 'enabled',
       defaultWorkflowPermissions: actionsPermissions.default_workflow_permissions,
       workflowsCanApprovePullRequests:
@@ -201,8 +204,13 @@ function canonicalRuleset(ruleset) {
   const normalized = normalizeJson(ruleset);
   normalized.bypass_actors = (normalized.bypass_actors ?? []).sort(compareJson);
   normalized.rules = (normalized.rules ?? []).map((rule) => {
-    if (rule.type === 'pull_request' && rule.parameters?.allowed_merge_methods) {
-      rule.parameters.allowed_merge_methods.sort();
+    if (rule.type === 'pull_request' && rule.parameters) {
+      if (rule.parameters.allowed_merge_methods) {
+        rule.parameters.allowed_merge_methods.sort();
+      }
+      if (Array.isArray(rule.parameters.required_reviewers) && rule.parameters.required_reviewers.length === 0) {
+        delete rule.parameters.required_reviewers;
+      }
     }
     if (rule.type === 'required_status_checks' && rule.parameters?.required_status_checks) {
       rule.parameters.required_status_checks.sort(compareJson);
@@ -213,6 +221,14 @@ function canonicalRuleset(ruleset) {
     return rule;
   }).sort(ruleOrder);
   return normalized;
+}
+
+function isCodeScanningEnabled(security, analyses) {
+  return (
+    security?.code_security?.status === 'enabled' ||
+    security?.advanced_security?.status === 'enabled' ||
+    (Array.isArray(analyses) && analyses.length > 0)
+  );
 }
 
 function compare(expected, actual, location, findings) {
