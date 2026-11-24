@@ -71,8 +71,9 @@ of the gate, not authorization for public visibility or publication.
       public artifact family, and type-checks without ambient `@types/node`.
 - [ ] Production dependency licenses pass the committed allowlist and the SBOM
       contains license metadata for every shipped dependency.
-- [ ] The latest scheduled extended fuzz campaign passes and any reduced
-      crashers have been promoted to reviewed regression vectors or tests.
+- [ ] A manually dispatched extended fuzz campaign passes on the release
+      commit, and any reduced crashers have been promoted to reviewed
+      regression vectors or tests.
 - [ ] The release workflow proves the signed tag is reachable from `main` and
       every canonical Pages artifact matches the reviewed build byte for byte.
 - [ ] Release assets include SHA-256 checksums, a CycloneDX SBOM, and a GitHub

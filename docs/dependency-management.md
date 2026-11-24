@@ -17,8 +17,8 @@ dependency change as a supply-chain and compatibility change.
    reproducibility, and a clean consumer install/type/runtime smoke test on
    every release candidate. Run the deterministic fuzz smoke gate on every
    change and inspect the latest rotating-seed extended campaign before release.
-5. Pin GitHub Actions to full commit SHAs. Dependabot may propose updates, but a
-   human must review the upstream release and immutable commit before merging.
+5. Pin GitHub Actions to full commit SHAs. Update a pin only after a human
+   reviews the upstream release and immutable commit.
 6. Do not add long-lived package-registry credentials. npm publication uses a
    repository-bound OIDC trusted publisher after the public package is
    bootstrapped.

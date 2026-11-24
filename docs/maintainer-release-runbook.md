@@ -42,8 +42,11 @@ rejects lightweight tags, unverified signatures, tags not reachable from
 `main`, version disagreement, and missing release notes.
 
 Enable GitHub-native secret scanning, push protection, dependency graph,
-Dependabot alerts and updates, CodeQL, private vulnerability reporting, and
-OpenSSF Scorecard after the repository is public. The repository-owned
+Dependabot alerts, CodeQL, private vulnerability reporting, and OpenSSF
+Scorecard after the repository is public. Leave Dependabot version and security
+updates off and keep workflows free of `schedule` triggers, so the repository
+runs automation only in response to pushes, pull requests, releases, and manual
+dispatch. The repository-owned
 Gitleaks workflow remains required because it scans every reachable commit in
 private and public repositories without depending on a GitHub plan.
 

@@ -2,8 +2,6 @@ name: Extended fuzzing
 
 on:
   pull_request:
-  schedule:
-    - cron: '23 4 * * 1'
   workflow_dispatch:
     inputs:
       seed:
@@ -12,7 +10,7 @@ on:
         type: string
 
 concurrency:
-  group: extended-fuzzing-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event_name == 'schedule' && 'scheduled' || format('manual-{0}', github.run_id) }}
+  group: extended-fuzzing-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('manual-{0}', github.run_id) }}
   cancel-in-progress: false
 
 permissions:

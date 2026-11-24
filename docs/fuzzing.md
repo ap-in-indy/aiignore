@@ -38,7 +38,8 @@ npm run fuzz:smoke -- --seed 0x12345678 --iterations 417 --target parser
 ```
 
 The normal `npm run verify` path executes 2,000 mutations per selected target.
-The weekly workflow executes 25,000 per target and rotates its seed using the
+The `Extended fuzzing` workflow runs on every pull request and on manual
+dispatch. It executes 25,000 per target and rotates its seed using the
 workflow run number. Manual runs may supply a seed. Every campaign is exactly
 reproducible from its seed and iteration count.
 
