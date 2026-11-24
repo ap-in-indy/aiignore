@@ -11,8 +11,9 @@ The policy requires:
 - public visibility, `main` as the default branch, Issues and Discussions;
 - squash-only merging, signed web commits, automatic branch deletion, and
   read-only default workflow permissions that cannot approve pull requests;
-- immutable releases, vulnerability alerts and fixes, private vulnerability
-  reporting, CodeQL, Dependabot updates, secret scanning, and push protection;
+- immutable releases, vulnerability alerts, private vulnerability reporting,
+  CodeQL, secret scanning, and push protection, with Dependabot updates and
+  scheduled workflows deliberately disabled;
 - public HTTPS Pages deployed only through the reviewed workflow;
 - an active, no-bypass `main` ruleset requiring signed commits, pull requests,
   resolved conversations, strict current-head testing, CodeQL thresholds, and

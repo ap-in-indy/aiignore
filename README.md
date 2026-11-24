@@ -168,8 +168,8 @@ required artifacts, forbidden development files, size, two-pack byte
 reproducibility, and clean installed runtime/type consumption; the release
 workflow adds checksums, a CycloneDX SBOM, and provenance attestation. Every
 verification run also performs deterministic parser/decision robustness
-fuzzing, with a larger rotating-seed campaign on every pull request and weekly
-schedule. A versioned
+fuzzing, with a larger rotating-seed campaign on every pull request and on
+manual dispatch. A versioned
 conformance manifest binds the exact specification, schemas, and vector bytes
 that comprise the draft 0.1 interoperability bundle.
 

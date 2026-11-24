@@ -6,6 +6,18 @@ specification compatibility is identified separately by the `aiignore` field.
 
 ## [Unreleased]
 
+### Changed
+
+- Removed scheduled triggers from the CodeQL, extended fuzzing, secret
+  scanning, and OpenSSF Scorecard workflows, and removed Dependabot version
+  updates. These checks now run only in response to repository activity.
+
+### Security
+
+- Updated `minimatch` to 11.0.9 and `re2js` to 2.10.0, and refreshed the
+  transitive `brace-expansion` and `fast-uri` dependencies, clearing all
+  production `npm audit` advisories.
+
 ## [0.1.0-alpha.1] - 2026-07-20
 
 ### Added

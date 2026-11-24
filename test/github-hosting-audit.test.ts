@@ -151,11 +151,11 @@ describe('public GitHub hosting policy audit', () => {
       immutableReleases: true,
       privateVulnerabilityReporting: true,
       vulnerabilityAlerts: true,
-      automatedSecurityFixes: true,
+      automatedSecurityFixes: false,
       secretScanning: true,
       secretScanningPushProtection: true,
       codeScanning: true,
-      dependabotSecurityUpdates: true,
+      dependabotSecurityUpdates: false,
       defaultWorkflowPermissions: 'read',
       workflowsCanApprovePullRequests: false,
       webCommitSignoffRequired: true

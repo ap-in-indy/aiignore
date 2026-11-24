@@ -26,7 +26,7 @@ is assessed voluntarily to expose future gaps.
 | OSPS-BR-01.03 isolate untrusted code from privileged assets | Implemented | Pull-request jobs have read-only contents and no secrets; publication is manual, tag-bound, and uses a protected environment/OIDC design. |
 | OSPS-BR-03.01 encrypt official project channels | Prepared | All declared project/distribution URLs use HTTPS; public endpoints are not live yet. |
 | OSPS-BR-03.02 cryptographically authenticate distribution | Prepared | npm integrity/provenance, signed tags, SHA-256 assets, attestations, and exact Pages verification exist in the release workflow but no release exists. |
-| OSPS-BR-07.01 prevent unencrypted secrets in VCS | Implemented | Checksum-pinned, suppression-resistant Gitleaks scans every reachable revision on PRs, schedules, and releases. |
+| OSPS-BR-07.01 prevent unencrypted secrets in VCS | Implemented | Checksum-pinned, suppression-resistant Gitleaks scans every reachable revision on PRs, pushes to `main`, and releases. |
 | OSPS-DO-01.01 basic user guide | Prepared | `README.md`, examples, recommended profile, CLI help, and adapter guides cover released functionality; no package release exists. |
 | OSPS-DO-02.01 defect-reporting guide | Prepared | Structured bug, RFC, and conformance issue forms plus `CONTRIBUTING.md`; issue tracker is private until launch. |
 | OSPS-GV-02.01 public change/usage discussion | Prepared | Issues, Discussions, RFC process, and support policy are configured but not public. |
@@ -50,7 +50,7 @@ is assessed voluntarily to expose future gaps.
 | OSPS-AC-04.01 least-privilege default CI permissions | Prepared | Every workflow declares explicit permissions; desired state requires read-only defaults and forbids workflow PR approval, but the public owner-side audit has not passed. |
 | OSPS-BR-02.01 unique release versions | Prepared | `docs/versioning.md`, SemVer package identity, signed tag, and release workflow bind one immutable version. |
 | OSPS-BR-04.01 functional/security change log | Prepared | `CHANGELOG.md` and exact tagged release notes are required and authenticated; no release exists. |
-| OSPS-BR-05.01 standardized dependency tooling | Implemented | npm lockfile, `npm ci --ignore-scripts`, audit, signature verification, license checks, and Dependabot. |
+| OSPS-BR-05.01 standardized dependency tooling | Implemented | npm lockfile, `npm ci --ignore-scripts`, audit, signature verification, and license checks. |
 | OSPS-BR-06.01 signed release or signed manifest | Prepared | Owner-only tag creation, exact verified tagger identity, restricted tag-only deployment, and attestations covering tarball, SBOM, and checksums; not yet exercised publicly. The alpha has no independent human release approval. |
 | OSPS-DO-06.01 dependency-selection/tracking guide | Implemented | `docs/dependency-management.md`. |
 | OSPS-DO-07.01 build instructions | Implemented | README quick start, Node engine constraint, lockfile install, and build/verify commands. |

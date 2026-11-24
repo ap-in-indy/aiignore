@@ -75,7 +75,7 @@ those into a single misleading badge.
 - [x] Canonical Pages build, package payload gate, signed-tag release workflow,
       checksums, SBOM, artifact attestation, and npm trusted-publisher path.
 - [x] Deterministic parser/decision robustness fuzzing with checked-in seeds,
-      replay instructions, and a scheduled rotating-seed extended campaign.
+      replay instructions, and a pull-request rotating-seed extended campaign.
 - [ ] Validate the adapter against released Codex builds on macOS, Linux, WSL,
       and native Windows. A provisional macOS/Codex 0.144.5 result is recorded;
       the portable suite passes Debian containers on Node 20 and 24, but live
